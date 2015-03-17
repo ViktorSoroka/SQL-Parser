@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Parser Sql</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="enter-input"
+                           value=""
+                           placeholder="Enter some some sql statement">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary btn-block" id="btn-start">Go!</button>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary btn-block" id="btn-reset">Show tables</button>
+            </div>
+        </div>
+        <div id="target"></div>
+    </div>
+</div>
+
+<!-- Latest compiled and minified JavaScript -->
+<script data-main="main" src="../node_modules/requirejs/require.js"></script>
+</body>
+</html>

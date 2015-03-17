@@ -1,0 +1,60 @@
+{
+  "director": [
+    {
+      "id": 1,
+      "name": "Joe Carnahan"
+    },
+    {
+      "id": 2,
+      "name": "James Cameron"
+    },
+    {
+      "id": 3,
+      "name": "Joss Whedon"
+    }
+  ],
+  "actor": [
+    {
+      "id": 1,
+      "name": "Liam Neeson",
+      "director_id": 5
+    },
+    {
+      "id": 2,
+      "name": "Bradley Cooper",
+      "director_id": 2
+    },
+    {
+      "id": 3,
+      "name": "Jessica Biel",
+      "director_id": 4
+    },
+    {
+      "id": 4,
+      "name": "asdasd",
+      "director_id": 1
+    }
+  ],
+  "some_stuff": [
+    {
+      "id": 1,
+      "name": "Liam Neeson",
+      "director_id": 5
+    },
+    {
+      "id": 2,
+      "name": "Bradley Cooper",
+      "director_id": 2
+    },
+    {
+      "id": 3,
+      "name": "Jessica Biel",
+      "director_id": 4
+    },
+    {
+      "id": 4,
+      "name": "asdasd",
+      "director_id": 1
+    }
+  ]
+}
