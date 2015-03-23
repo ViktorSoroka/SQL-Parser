@@ -15,3 +15,16 @@ body {
 #target table th {
     min-width: 20px;
 }
+
+.error-state{
+    display: block;
+    visibility: hidden;
+    width: 100%;
+    text-align: center;
+    margin: 10px 0 20px;
+    transition: visibility 2s;
+}
+
+.error-state.show {
+    visibility: visible;
+}

@@ -1,19 +1,19 @@
-define('SQL_Engine/parser', ['SQL_Engine/parserCore'], function (parserCore) {
+define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parserCore) {
 
-    var pattetnToloverCase = function (pattern) {
+    var pattetnToLoverCase = function (pattern) {
             return pattern.then(function (r) {
                 return r.toLowerCase();
             });
         },
         all = parserCore.txt('*'),
         equal = parserCore.txt('='),
-        select = pattetnToloverCase(parserCore.rgx(/select/i)),
-        from = pattetnToloverCase(parserCore.rgx(/from/i)),
-        join = pattetnToloverCase(parserCore.rgx(/join/i)),
-        where = pattetnToloverCase(parserCore.rgx(/where/i)),
-        on = pattetnToloverCase(parserCore.rgx(/on/i)),
-        and = pattetnToloverCase(parserCore.rgx(/and/i)),
-        or = pattetnToloverCase(parserCore.rgx(/or/i)),
+        select = pattetnToLoverCase(parserCore.rgx(/select/i)),
+        from = pattetnToLoverCase(parserCore.rgx(/from/i)),
+        join = pattetnToLoverCase(parserCore.rgx(/join/i)),
+        where = pattetnToLoverCase(parserCore.rgx(/where/i)),
+        on = pattetnToLoverCase(parserCore.rgx(/on/i)),
+        and = pattetnToLoverCase(parserCore.rgx(/and/i)),
+        or = pattetnToLoverCase(parserCore.rgx(/or/i)),
         table = parserCore.rgx(/^[a-z_]+(\d+)?/i),
         ws = parserCore.rgx(/\s+/),
         wso = parserCore.opt(ws),
@@ -69,8 +69,8 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore'], function (parserCore) {
                 }
             });
             return {
-                tableColumn: result,
-                tables: tables
+                tableColumn: _.flatten(_.pluck(result, 'columns'))
+                //tables: tables
             };
         }));
     }();

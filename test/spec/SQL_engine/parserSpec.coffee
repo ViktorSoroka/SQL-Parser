@@ -33,34 +33,47 @@ define (require) ->
 
     it "should parse text like *WHERE table_name.property OPERATOR value", ->
       expect(parser.whereBlock.exec('where Table1.column_some > 3')).toEqual
-        res:
+        res: [
           operator: '>'
-          column: 'Table1.column_some'
-          value: '3'
+          left: 'Table1.column_some'
+          right: '3'
+          ]
+        end: 28
+
+    it "should parse text like *WHERE value OPERATOR table_name.property", ->
+      expect(parser.whereBlock.exec('where 3 > Table1.column_some')).toEqual
+        res: [
+          operator: '>'
+          left: '3'
+          right: 'Table1.column_some'
+        ]
         end: 28
 
     it "should parse text if operator is equal and value is string", ->
       expect(parser.whereBlock.exec('where Table1.column_some = "asdasd"')).toEqual
-        res:
+        res: [
           operator: '='
-          column: 'Table1.column_some'
-          value: 'asdasd'
+          left: 'Table1.column_some'
+          right: 'asdasd'
+          ]
         end: 35
 
     it "should parse text if operator is equal and value is number", ->
       expect(parser.whereBlock.exec('where Table1.column_some = 30')).toEqual
-        res:
+        res: [
           operator: '='
-          column: 'Table1.column_some'
-          value: '30'
+          left: 'Table1.column_some'
+          right: '30'
+          ]
         end: 29
 
     it "should parse text if operator is not equal and value is number", ->
       expect(parser.whereBlock.exec('where Table1.column_some <> 34')).toEqual
-        res:
+        res: [
           operator: '<>'
-          column: 'Table1.column_some'
-          value: '34'
+          left: 'Table1.column_some'
+          right: '34'
+          ]
         end: 30
 
     it "should not parse text if operator is not equal and value is string", ->
@@ -68,35 +81,43 @@ define (require) ->
 
     it "should parse multiple conditions which separated by operator *AND*", ->
       expect(parser.whereBlock.exec('where Table1.column_some <> 34 and Table1.name = "Max"')).toEqual
-        res:
-          operator: '<>'
-          column: 'Table1.column_some'
-          value: '34'
-          additional: [
+        res: [
+          {
+            operator: '<>'
+            left: 'Table1.column_some'
+            right: '34'
+          },
+          {
             boolean: 'and'
             operator: '='
-            value: 'Max'
-            column: 'Table1.name'
-            ]
+            right: 'Max'
+            left: 'Table1.name'
+          }
+        ]
         end: 54
 
     it "should parse multiple conditions which separated by operator *OR*", ->
       expect(parser.whereBlock.exec('where Table1.column_some <> 34 or Table1.name = "Max" or Table2.name = "Rex"')).toEqual
-        res:
-          operator: '<>'
-          column: 'Table1.column_some'
-          value: '34'
-          additional: [
+        res: [
+          {
+            operator: '<>'
+            left: 'Table1.column_some'
+            right: '34'
+          },
+          {
             boolean: 'or'
             operator: '='
-            value: 'Max'
-            column: 'Table1.name'
+            right: 'Max'
+            left: 'Table1.name'
+          }
           ,
+          {
             boolean: 'or'
             operator: '='
-            value: 'Rex'
-            column: 'Table2.name'
-          ]
+            right: 'Rex'
+            left: 'Table2.name'
+          }
+        ]
         end: 76
 
     it "should not parse multiple conditions if use both operator *AND* and *OR*", ->
@@ -130,11 +151,7 @@ define (require) ->
         res:
           from: ['Salespeople']
           select:
-            tables: ['Salespeople']
-            tableColumn: [{
-              table:'Salespeople'
-              columns: ['Salespeople.first_name']
-            }]
+            tableColumn: ['Salespeople.first_name']
         end: 46
 
     it "should parse repeating expressions which can be divided by comma", ->
@@ -142,11 +159,7 @@ define (require) ->
         res:
           from: ['Salespeople']
           select:
-            tables: ['Salespeople']
-            tableColumn: [{
-              table:'Salespeople'
-              columns: ['Salespeople.first_name', 'Salespeople.last_name']
-            }]
+            tableColumn: ['Salespeople.first_name', 'Salespeople.last_name']
         end: 68
 
     it "should parse text which divided by comma and whitespaces if it present", ->
@@ -154,11 +167,7 @@ define (require) ->
         res:
           from: ['Salespeople']
           select:
-            tables: ['Salespeople']
-            tableColumn: [{
-              table:'Salespeople'
-              columns: ['Salespeople.first_name', 'Salespeople.last_name']
-            }]
+            tableColumn: ['Salespeople.first_name', 'Salespeople.last_name']
         end: 69
 
     it "should parse columns from different tables", ->
@@ -166,17 +175,7 @@ define (require) ->
         res:
           from: ['Salespeople', 'Users']
           select:
-            tables: ['Salespeople', 'Users']
-            tableColumn: [
-              {
-                table: 'Salespeople'
-                columns: ['Salespeople.first_name']
-              }
-              {
-                table: 'Users'
-                columns: ['Users.last_name']
-              }
-            ]
+            tableColumn: ['Salespeople.first_name', 'Users.last_name']
         end: 70
 
     it "should parse from different tables and group data from certain table", ->
@@ -184,17 +183,7 @@ define (require) ->
         res:
           from: ['Salespeople', 'Customers']
           select:
-            tables: ['Salespeople', 'Customers']
-            tableColumn: [
-              {
-                table: 'Salespeople'
-                columns: ['Salespeople.first_name', 'Salespeople.last_name']
-              }
-              {
-                table: 'Customers'
-                columns: ['Customers.budget']
-              }
-            ]
+            tableColumn: ['Salespeople.first_name', 'Salespeople.last_name', 'Customers.budget']
         end: 98
 
     it "should parse text with join block and where", ->
@@ -202,18 +191,15 @@ define (require) ->
         res:
           from: ['Table']
           select:
-            tables: ['Table']
-            tableColumn: [{
-              table: 'Table'
-              columns: ['Table.name']
-            }]
+            tableColumn:  ['Table.name']
           join: [{
               on: 'Customers'
               columns: ['Customers.id', 'Table.id']
               tables: ['Customers', 'Table']
             }]
-          where:
-            operator: '>'
-            value: '4'
-            column: 'Table.id'
+          where: [
+              operator: '>'
+              right: '4'
+              left: 'Table.id'
+            ]
         end: 89

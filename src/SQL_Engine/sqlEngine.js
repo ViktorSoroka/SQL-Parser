@@ -34,32 +34,32 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
         },
 
         filterTablesColumns = function (table, columns) {
-            _.forIn(table, function (table_stuff, table_name) {
-                var table_select = _.find(columns, function (reee) {
-                    return reee.table === table_name;
-                });
-                if (!table_select) {
-                    delete table[table_name];
-                } else {
-                    _.each(table_stuff, function (column) {
-                        _.forIn(column, function (column_value, column_name) {
-                            if (!_.includes(table_select.columns, column_name)) {
-                                delete column[column_name];
-                            }
-                        });
-                    });
+            if (columns) {
+                var keys = _.keys(table[0]);
+                if (!isInStuff(keys, columns)) {
+                    throw Error('Some columns don`t present in result table');
                 }
-            });
-            return table;
+                _.each(table, function (row) {
+                    _.forIn(row, function (column_value, column_name) {
+                        if (!_.includes(columns, column_name)) {
+                            delete row[column_name];
+                        }
+                    });
+                });
+                return table;
+            }
         },
+
         joinFilter = function (tables_bd, join_stuff, from_filter, select_filter, table_columns) {
             var clone_tables_bd = _.cloneDeep(tables_bd),
-                result = [];
+                result = [],
+                order1;
             if (!isInStuff(join_stuff.tables, [from_filter[0], join_stuff.on]) || from_filter[0] === join_stuff.on) return;
-            if (select_filter !== '*') {
-                clone_tables_bd = filterTablesColumns(clone_tables_bd, table_columns);
-            }
-            var order1 = join_stuff.tables[0];
+            //if (select_filter !== '*') {
+            //    console.log(clone_tables_bd, table_columns);
+            //    clone_tables_bd = filterTablesColumns(clone_tables_bd, table_columns);
+            //}
+            order1 = join_stuff.tables[0];
             _.each(tables_bd[join_stuff.tables[0]], function (table_row, index) {
                 var row1 = clone_tables_bd[join_stuff.tables[0]] && clone_tables_bd[join_stuff.tables[0]][index];
                 _.each(tables_bd[join_stuff.tables[1]], function (table_row1, index1) {
@@ -83,64 +83,65 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return result;
         },
         whereFilter = function (data_to_filter, where_obj) {
-            //console.log(data_to_filter);
-            var filters = {
-                '=': function (expect, value) {
-                    return expect == value;
-                },
-                '<>': function (expect, value) {
-                    if (!_.isFinite(+expect)) {
-                        throw Error('incorrect type');
+            if (where_obj) {
+                var filters = {
+                    '=': function (expect, value) {
+                        return expect == value;
+                    },
+                    '<>': function (expect, value) {
+                        if (!_.isFinite(+expect)) {
+                            throw Error('incorrect type');
+                        }
+                        return expect != value;
+                    },
+                    '>': function (expect, value) {
+                        //if (!_.isFinite(+expect)) {
+                        //    throw Error('incorrect type');
+                        //}
+                        return expect > value;
+                    },
+                    '<': function (expect, value) {
+                        if (!_.isFinite(+expect)) {
+                            throw Error('incorrect type');
+                        }
+                        return expect < value;
+                    },
+                    '>=': function (expect, value) {
+                        if (!_.isFinite(+expect)) {
+                            throw Error('incorrect type');
+                        }
+                        return expect >= value;
+                    },
+                    '<=': function (expect, value) {
+                        if (!_.isFinite(+expect)) {
+                            throw Error('incorrect type');
+                        }
+                        return expect <= value;
                     }
-                    return expect != value;
-                },
-                '>': function (expect, value) {
-                    if (!_.isFinite(+expect)) {
-                        throw Error('incorrect type');
+                };
+                _.each(data_to_filter, function (row, row_name) {
+                    if (where_obj.length === 1 || (where_obj[1] && where_obj[1].boolean === 'and')) {
+                        var left,
+                            right,
+                            flag;
+                        flag = where_obj.every(function (rules) {
+                            left = _.has(row, rules.left) ? row[rules.left] : rules.left;
+                            right = _.has(row, rules.right) ? row[rules.right] : rules.right;
+                            return filters[rules.operator](left, right);
+                        });
                     }
-                    return expect > value;
-                },
-                '<': function (expect, value) {
-                    if (!_.isFinite(+expect)) {
-                        throw Error('incorrect type');
+                    if (where_obj[1] && where_obj[1].boolean === 'or') {
+                        flag = where_obj.some(function (rules) {
+                            left = _.has(row, rules.left) ? row[rules.left] : rules.left;
+                            right = _.has(row, rules.right) ? row[rules.right] : rules.right;
+                            return filters[rules.operator](left, right);
+                        });
                     }
-                    return expect < value;
-                },
-                '>=': function (expect, value) {
-                    if (!_.isFinite(+expect)) {
-                        throw Error('incorrect type');
+                    if (!flag) {
+                        delete data_to_filter[row_name]
                     }
-                    return expect >= value;
-                },
-                '<=': function (expect, value) {
-                    if (!_.isFinite(+expect)) {
-                        throw Error('incorrect type');
-                    }
-                    return expect <= value;
-                }
-            };
-            _.each(data_to_filter, function (row, row_name) {
-                if (where_obj.length === 1 || (where_obj[1] && where_obj[1].boolean === 'and')) {
-                    var left,
-                        right,
-                        flag;
-                    flag = where_obj.every(function (rules) {
-                        left = _.has(row, rules.left) ? row[rules.left] : rules.left;
-                        right = _.has(row, rules.right) ? row[rules.right] : rules.right;
-                        return filters[rules.operator](left, right);
-                    });
-                }
-                if (where_obj[1] && where_obj[1].boolean === 'or') {
-                    flag = where_obj.some(function (rules) {
-                        left = _.has(row, rules.left) ? row[rules.left] : rules.left;
-                        right = _.has(row, rules.right) ? row[rules.right] : rules.right;
-                        return filters[rules.operator](left, right);
-                    });
-                }
-                if (!flag) {
-                    delete data_to_filter[row_name]
-                }
-            });
+                });
+            }
         },
         SqlEngine = function () {
         };
@@ -160,32 +161,26 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 filtered = filterTables(tables, res.from);
                 if (res.join) {
                     filtered = filterTables(tables, res.join[0]['tables']);
-                    var join_result = joinFilter(filtered, res.join[0], res.from, select, select.tableColumn);
-                    if (res.where) {
-                        whereFilter(join_result, res.where);
+                    var join_result = joinFilter(filtered, res.join[0], res.from);
+                    whereFilter(join_result, res.where);
+                    if (res.from !== '*') {
+                        filterTablesColumns(join_result, select.tableColumn);
+                        generated_table['Sql result'] = join_result;
+                        return generated_table;
                     }
-                    generated_table['Sql result'] = join_result;
-                    return generated_table;
-                }
-
-                if (select[0] !== '*') {
-                    filtered = filterTablesColumns(filtered, select.tableColumn);
                 }
                 if (_.size(filtered) === 1) {
                     generated_table['Sql result'] = filtered[_.keys(filtered)[0]];
-                    if (res.where) {
-                        whereFilter(generated_table['Sql result'], res.where);
-                    }
+                    whereFilter(generated_table['Sql result'], res.where);
+                    filterTablesColumns(generated_table['Sql result'], select.tableColumn);
                     return generated_table;
                 } else if (_.size(filtered) === res.from.length) {
                     generated_table['Sql result'] = crossJoin(filtered);
-                    if (res.where) {
-                        whereFilter(generated_table['Sql result'], res.where);
-                    }
+                    whereFilter(generated_table['Sql result'], res.where);
+                    filterTablesColumns(generated_table['Sql result'], select.tableColumn);
                     return generated_table;
                 }
             }
-
             catch (e) {
                 console.log(e.message + ' ' + e.stack);
             }

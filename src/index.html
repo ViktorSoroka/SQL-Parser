@@ -12,10 +12,11 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <div class="form-group">
+                <div class="form-group" id="enter-input-wrap">
                     <input type="text" class="form-control" id="enter-input"
-                           value="select * from actor where actor.id = 2 and actor.name = 'Bradley Cooper'"
+                           value="select actor.name, some_stuff.id from actor join some_stuff on actor.id = some_stuff.id"
                            placeholder="Enter some some sql statement">
+                    <span class="error-state">There is no data due you query or it is wrong!</span>
                 </div>
             </div>
             <div class="col-md-2">

@@ -1,6 +1,11 @@
 define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern) {
     var slice = Array.prototype.slice;
     return {
+        /**
+         * @description - it can parse some text stuff by String matcher
+         * @param text {String} - define data which need to find
+         * @returns {Pattern}
+         */
         txt: function (text) {
             return new Pattern(function (str, pos) {
                 if (str.substr(pos, text.length) == text) {
@@ -8,7 +13,11 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                 }
             });
         },
-
+        /**
+         * @description - it can parse some text stuff by RegExp matcher
+         * @param regexp {RegExp} - define data which need to find
+         * @returns {Pattern}
+         */
         rgx: function (regexp) {
             return new Pattern(function (str, pos) {
                 pos = pos || 0;
@@ -18,7 +27,11 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                 }
             });
         },
-
+        /**
+         * @description - it take in some pattern which not necessarily to match some stuff
+         * @param pattern {Pattern} - instance of Pattern
+         * @returns {Pattern}
+         */
         opt: function (pattern) {
             return new Pattern(function (str, pos) {
                 var result = pattern.exec(str, pos);
@@ -28,7 +41,12 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                     };
             });
         },
-
+        /**
+         * @description - it take in two patterns and returns stuff if the second one can`t parse but the first can
+         * @param pattern1 {Pattern} - first pattern
+         * @param pattern2 {Pattern} - second pattern
+         * @returns {Pattern}
+         */
         exc: function (pattern1, pattern2) {
             return (arguments.length === 2) ? new Pattern(function (str, pos) {
                 if (!pattern2.exec(str, pos) && pattern1.exec(str, pos)) {
@@ -36,8 +54,12 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                 }
             }) : undefined;
         },
-
-        any: function () {
+        /**
+         * @description - it take in patterns and returns the parsed result of the very first pattern which can parse
+         * @param {...Pattern} patterns - any number of patterns
+         * @returns {Pattern}
+         */
+        any: function (patterns) {
             var args = slice.call(arguments),
                 args_length = args.length;
             if (!args_length) {
@@ -56,8 +78,12 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                 }
             });
         },
-
-        seq: function () {
+        /**
+         * @description - it execute a sequence of patterns
+         * @param patterns {...Pattern} - any number of patterns
+         * @returns {Pattern}
+         */
+        seq: function (patterns) {
             var args = slice.call(arguments),
                 result_parser;
 
@@ -77,6 +103,12 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                     };
             });
         },
+        /**
+         * @description - it execute patterns which in the parameters by repeating sequence till it can parse
+         * @param pattern {Pattern} - some pattern
+         * @param separator - pattern which may to exist in parsed string but will not exist in parsed result
+         * @returns {Pattern}
+         */
         rep: function (pattern, separator) {
             var separated = !separator ? pattern :
                 this.seq(separator, pattern).then(function (z) {

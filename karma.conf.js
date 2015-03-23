@@ -7,6 +7,7 @@ module.exports = function(config) {
       {pattern: 'bower_components/jquery/dist/jquery.min.js', included: false},
       {pattern: 'bower_components/lodash/lodash.min.js', included: false},
       {pattern: 'bower_components/text/text', included: false},
+      'test/spec/**/*.json',
       {pattern: 'src/SQL_Engine/*.js', included: true},
       {pattern: 'test/spec/**/*Spec.coffee', included: false},
       'test-main.js'
@@ -14,7 +15,13 @@ module.exports = function(config) {
     exclude: [],
     preprocessors: {
       'src/**/*.js': ['coverage'],
-      '**/*.coffee': ['coffee']
+      '**/*.coffee': ['coffee'],
+      'test/spec/**/*.json': ['json_fixtures']
+    },
+    jsonFixturesPreprocessor: {
+      stripPrefix: 'test/spec/SQL_engine/fixtures/',
+      prependPrefix: '',
+      variableName: '__mocks__'
     },
     reporters: ['progress'],
     port: 9876,
