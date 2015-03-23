@@ -92,7 +92,7 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore'], function (parserCore) {
                 return [{
                     on: r[2],
                     tables: [r[6]['table'], r[10]['table']],
-                    columns: [r[6]['table'] + '.' + r[6]['column'], r[10]['table'] + '.' +  r[10]['column']]
+                    columns: [r[6]['table'] + '.' + r[6]['column'], r[10]['table'] + '.' + r[10]['column']]
                 }];
             });
     }();
@@ -116,41 +116,40 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore'], function (parserCore) {
         return parserCore.any(parserCore.seq(
             whereOperator,
             wso,
-            digit
+            parserCore.any(digit, table_column)
         ), parserCore.seq(
             equal,
             wso,
-            parserCore.any(digit, quotesPattern(column_stuff))
+            parserCore.any(digit, quotesPattern(column_stuff), table_column)
         )).then(function (r) {
-                if (r[0] !== '=' && !isFinite(r[2])) {
-                    return undefined;
-                }
-
-                return {
-                    operator: r[0],
-                    value: r[2]
-                };
-            });
+            //if (r[0] !== '=' && !isFinite(r[2])) {
+            //    return undefined;
+            //}
+            return {
+                operator: r[0],
+                right: r[2].table ? r[2]['table'] + '.' + r[2]['column'] : r[2]
+            };
+        });
     }());
 
     wherePatternBlock = function (pattern) {
         return parserCore.seq(ws, parserCore.rep(parserCore.seq(
-                    pattern,
-                    ws,
-                    table_column,
-                    ws,
-                    whereOperatorValue
-                ).then(function (r) {
-                        if (r[4]) return {
-                            boolean: r[0],
-                            operator: r[4]['operator'],
-                            column: r[2]['table'] + '.' + r[2]['column'],
-                            value: r[4]['value']
-                        }
+                pattern,
+                ws,
+                parserCore.any(digit, quotesPattern(column_stuff), table_column),
+                ws,
+                whereOperatorValue
+            ).then(function (r) {
+                    if (r[4]) return {
+                        boolean: r[0],
+                        operator: r[4]['operator'],
+                        left: r[2].table ? r[2]['table'] + '.' + r[2]['column'] : r[2],
+                        right: r[4].table ? r[4]['table'] + '.' + r[4]['column'] : r[4].right
                     }
-                ), ws)
+                }
+            ), ws)
         ).then(function (result) {
-                    return result[1];
+                return result[1];
             });
     };
 
@@ -158,19 +157,19 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore'], function (parserCore) {
         return parserCore.seq(
             where,
             ws,
-            table_column,
+            parserCore.any(table_column, digit, quotesPattern(column_stuff)),
             wso,
             whereOperatorValue,
             parserCore.opt(parserCore.any(wherePatternBlock(and), wherePatternBlock(or)))
         ).then(function (result, last_index, initial_str) {
                 if (!result[4]) return undefined;
-                var parsed_result = {
+                var parsed_result = [{
                     operator: result[4]['operator'],
-                    column: result[2]['table'] + '.' + result[2]['column'],
-                    value: result[4]['value']
-                };
+                    left: result[2].table ? result[2]['table'] + '.' + result[2]['column'] : result[2],
+                    right: result[4].right
+                }];
                 if (result[5]) {
-                    parsed_result['additional'] = result[5];
+                    parsed_result = parsed_result.concat(result[5]);
                 }
                 if (last_index === initial_str.length) {
                     return parsed_result;
@@ -178,7 +177,7 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore'], function (parserCore) {
             });
     }());
 
-    parse =  function (str, pos) {
+    parse = function (str, pos) {
         return parserCore.seq(
             select,
             ws,

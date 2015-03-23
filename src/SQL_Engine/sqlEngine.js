@@ -83,6 +83,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return result;
         },
         whereFilter = function (data_to_filter, where_obj) {
+            //console.log(data_to_filter);
             var filters = {
                 '=': function (expect, value) {
                     return expect == value;
@@ -119,13 +120,26 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 }
             };
             _.each(data_to_filter, function (row, row_name) {
-                _.forIn(row, function (column, column_name) {
-                    if (column_name === where_obj.column) {
-                        if (!filters[where_obj.operator](column, where_obj.value)) {
-                            delete data_to_filter[row_name]
-                        }
-                    }
-                });
+                if (where_obj.length === 1 || (where_obj[1] && where_obj[1].boolean === 'and')) {
+                    var left,
+                        right,
+                        flag;
+                    flag = where_obj.every(function (rules) {
+                        left = _.has(row, rules.left) ? row[rules.left] : rules.left;
+                        right = _.has(row, rules.right) ? row[rules.right] : rules.right;
+                        return filters[rules.operator](left, right);
+                    });
+                }
+                if (where_obj[1] && where_obj[1].boolean === 'or') {
+                    flag = where_obj.some(function (rules) {
+                        left = _.has(row, rules.left) ? row[rules.left] : rules.left;
+                        right = _.has(row, rules.right) ? row[rules.right] : rules.right;
+                        return filters[rules.operator](left, right);
+                    });
+                }
+                if (!flag) {
+                    delete data_to_filter[row_name]
+                }
             });
         },
         SqlEngine = function () {
@@ -134,6 +148,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
     SqlEngine.prototype = {
         constructor: SqlEngine,
         execute: function (input) {
+            console.log(parser.parse(input, 0).res);
             try {
                 var res = parser.parse(input, 0) && parser.parse(input, 0).res,
                     select = res.select,
