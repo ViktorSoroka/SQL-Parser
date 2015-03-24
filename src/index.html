@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Parser Sql</title>
     <!-- Latest compiled and minified CSS -->
+    <link href='http://fonts.googleapis.com/css?family=Pathway+Gothic+One' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css"/>
 </head>
@@ -13,9 +14,10 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="form-group" id="enter-input-wrap">
-                    <input type="text" class="form-control" id="enter-input"
-                           value="select actor.name, some_stuff.id from actor join some_stuff on actor.id = some_stuff.id"
-                           placeholder="Enter some some sql statement">
+                    <div class="input-group">
+                        <span class="input-group-addon">SELECT</span>
+                        <input type="text" class="form-control" id="enter-input" value="select actor.name, some_stuff.id from actor join some_stuff on actor.id = some_stuff.id" placeholder="Enter some some sql statement">
+                    </div>
                     <span class="error-state">There is no data due you query or it is wrong!</span>
                 </div>
             </div>

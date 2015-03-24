@@ -50,7 +50,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
 
-        joinFilter = function (tables_bd, join_stuff, from_filter, select_filter, table_columns) {
+        joinFilter = function (tables_bd, join_stuff, from_filter) {
             var clone_tables_bd = _.cloneDeep(tables_bd),
                 result = [],
                 order1;
@@ -149,8 +149,10 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
     SqlEngine.prototype = {
         constructor: SqlEngine,
         execute: function (input) {
-            console.log(parser.parse(input, 0).res);
+            //console.log(parser.parse(input, 0).res);
             try {
+                input = 'SELECT ' + input;
+                console.log(input);
                 var res = parser.parse(input, 0) && parser.parse(input, 0).res,
                     select = res.select,
                     tables,
