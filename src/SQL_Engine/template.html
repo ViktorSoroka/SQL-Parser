@@ -1,6 +1,5 @@
-<% _.forIn(items, function(item, key){ %>
 <table class="table table-condensed">
-    <caption class="text-center"><%= key%></caption>
+    <caption class="text-center"><%= table_name%></caption>
     <thead>
         <tr>
             <%_.forIn(_.compact(item)[0], function(column, key){ %>
@@ -18,4 +17,3 @@
     <% }); %>
     </tbody>
 </table>
-<% }); %>

@@ -89,9 +89,9 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                         return expect == value;
                     },
                     '<>': function (expect, value) {
-                        if (!_.isFinite(+expect)) {
-                            throw Error('incorrect type');
-                        }
+                        //if (!_.isFinite(+expect)) {
+                        //    throw Error('incorrect type');
+                        //}
                         return expect != value;
                     },
                     '>': function (expect, value) {
@@ -101,21 +101,21 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                         return expect > value;
                     },
                     '<': function (expect, value) {
-                        if (!_.isFinite(+expect)) {
-                            throw Error('incorrect type');
-                        }
+                        //if (!_.isFinite(+expect)) {
+                        //    throw Error('incorrect type');
+                        //}
                         return expect < value;
                     },
                     '>=': function (expect, value) {
-                        if (!_.isFinite(+expect)) {
-                            throw Error('incorrect type');
-                        }
+                        //if (!_.isFinite(+expect)) {
+                        //    throw Error('incorrect type');
+                        //}
                         return expect >= value;
                     },
                     '<=': function (expect, value) {
-                        if (!_.isFinite(+expect)) {
-                            throw Error('incorrect type');
-                        }
+                        //if (!_.isFinite(+expect)) {
+                        //    throw Error('incorrect type');
+                        //}
                         return expect <= value;
                     }
                 };

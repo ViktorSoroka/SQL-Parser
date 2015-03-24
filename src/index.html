@@ -4,28 +4,33 @@
     <meta charset="UTF-8">
     <title>Parser Sql</title>
     <!-- Latest compiled and minified CSS -->
+    <link href='http://fonts.googleapis.com/css?family=Molengo' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,700,300)' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans+Narrow' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Pathway+Gothic+One' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-<div class="wrapper">
-    <div class="container">
+<div id="wrapper">
+    <header class="container clearfix">SQL Parser</header>
+    <div class="container parser-wrap">
         <div class="row">
-            <div class="col-md-8">
-                <div class="form-group" id="enter-input-wrap">
-                    <div class="input-group">
-                        <span class="input-group-addon">SELECT</span>
-                        <input type="text" class="form-control" id="enter-input" value="select actor.name, some_stuff.id from actor join some_stuff on actor.id = some_stuff.id" placeholder="Enter some some sql statement">
+            <div class="col-md-10">
+                <form class="parser-form" autocomplete="off">
+                    <div class="form-group" id="enter-input-wrap">
+                        <div class="input-group">
+                            <span class="input-group-addon">SELECT</span>
+                            <input type="text" class="form-control" id="enter-input"
+                                   value="actor.name, some_stuff.id from actor join some_stuff on actor.id = some_stuff.id"
+                                   placeholder="Enter some some sql statement and press &quot;Enter&quot; to execute it...">
+                        </div>
+                        <span class="error-state">There is no data due you query or it is wrong!</span>
                     </div>
-                    <span class="error-state">There is no data due you query or it is wrong!</span>
-                </div>
+                </form>
             </div>
             <div class="col-md-2">
-                <button type="button" class="btn btn-primary btn-block" id="btn-start">Go!</button>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-primary btn-block" id="btn-reset">Show tables</button>
+                <button type="button" class="btn btn-warning btn-block" id="btn-reset">Show tables</button>
             </div>
         </div>
         <div id="target"></div>

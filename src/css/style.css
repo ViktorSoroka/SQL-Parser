@@ -1,20 +1,64 @@
 body {
-    font-family: 'Pathway Gothic One', Arial sans-serif;
     font-size: 20px;
     margin: 20px;
-    background: rgba(178, 159, 167, 0.81);
+    font-family: 'Pathway Gothic One', Arial sans-serif;
+    background: url(../images/clean-sky-hd-wallpapers.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }
-.wrapper {
-    margin: 100px 0;
+
+.input-group-addon {
+    color: white;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 18px;
+    background: rgb(239, 182, 79);
 }
-#target table{
+
+#btn-start, #btn-reset {
+    font-size: 20px;
+    padding: 2px 0;
+}
+
+.parser-wrap {
+    position: relative;
+    top: 240px;
+}
+
+header {
+    left: 0;
+    right: 0;
+    position: fixed;
+    margin: 80px 0 80px;
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+    color: rgba(190, 124, 124, 0.8);
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 90px;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+    text-shadow: #EDEDED 3px 2px 0;
+}
+
+#target table {
+    font-family: 'PT Sans Narrow', Helvetica, Arial, sans-serif;
     display: table;
     width: 50%;
     margin: 0 auto 20px;
+    color: rgba(255,255,255, 0.8);
+    background: rgba(0, 0, 0, 0.3);
+    -webkit-transition: all 2s;
+    opacity: 0.3;
 }
 
-.row{
-    margin-bottom: 40px;
+#target th{
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 #target table tr,
@@ -26,42 +70,67 @@ th, td{
     text-align: center;
 }
 
-.table>tbody>tr>td{
+.table>tbody>tr>td {
     border: none;
 }
 
-caption{
-    padding-top: 2px;
-    padding-bottom: 2px;
-    color: #fff;
+caption {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+    border-bottom: 2px solid transparent;
+    color: rgba(38, 222, 255, 0.68);
     font-weight: bold;
-    font-size: 22px;
-    background: rgba(255, 220, 181, 0.76);
+    font-size: 24px;
+    background: rgba(126, 20, 63, 0.55);
 }
 
-.error-state{
+.has-error, .has-success {
+    box-shadow: 0 0 2px 0;
+    border-radius: 5px;
+}
+
+.error-state {
     display: block;
     opacity: 0;
     width: 100%;
     position: absolute;
     font-weight: 300;
-    color: #fff;
+    color: rgba(165, 3, 3, 0.8);
     text-align: center;
     margin: 10px 0 10px;
+    font-size: 22px;
     bottom: 0;
+    text-shadow: 0 0 7px #E23379;
 }
 
-#enter-input{
+#enter-input {
+    height: 34px;
+    line-height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    color: #50A1DB;
     font-size: 20px;
     position: relative;
+    font-family: 'Molengo', Verdana, Arial, Helvetica, sans-serif;
 }
 
-.error-state.show {
+.error-state.show, .table {
     -webkit-animation: show 300ms forwards, bounce 500ms 100ms;
     -moz-animation: show 300ms forwards, bounce 500ms 100ms;
     -ms-animation: show 300ms forwards, bounce 500ms 100ms;
     -o-animation: show 300ms forwards, bounce 500ms 100ms;
     animation: show 300ms forwards, bounce 500ms 100ms;
+}
+
+.table {
+    position: relative;
+    bottom: 30px;
+    -webkit-animation: show 500ms ease-in-out forwards;
+    -moz-animation: show 500ms ease-in-out forwards;
+    -ms-animation: show 500ms ease-in-out forwards;
+    -o-animation: show 500ms ease-in-out forwards;
+    animation: show 500ms ease-in-out forwards;
 }
 
 @-webkit-keyframes show {
@@ -127,4 +196,24 @@ caption{
     0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
     40% {transform: translateY(-20px);}
     60% {transform: translateY(-10px);}
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: rgba(255,255,255, 0);
+    -webkit-border-radius: 100px;
+}
+::-webkit-scrollbar:hover {
+    width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #fa3424;
+    -webkit-border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active  {
+    background: #3262fa;
 }
