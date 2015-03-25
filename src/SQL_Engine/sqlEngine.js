@@ -2,6 +2,11 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
     var isInStuff = function (stuff, in_stuff) {
             return _.size(_.difference(stuff, in_stuff)) === _.size(stuff) - _.size(in_stuff);
         },
+
+        getTableNames = function (tables) {
+            return _.keys(tables);
+        },
+
         filterTables = function (tables, filter) {
             var filter_table = _.cloneDeep(tables),
                 tables_names = _.keys(tables);
@@ -50,38 +55,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
 
-        joinFilter = function (tables_bd, join_stuff, from_filter) {
-            var clone_tables_bd = _.cloneDeep(tables_bd),
-                result = [],
-                order1;
-            if (!isInStuff(join_stuff.tables, [from_filter[0], join_stuff.on]) || from_filter[0] === join_stuff.on) return;
-            //if (select_filter !== '*') {
-            //    console.log(clone_tables_bd, table_columns);
-            //    clone_tables_bd = filterTablesColumns(clone_tables_bd, table_columns);
-            //}
-            order1 = join_stuff.tables[0];
-            _.each(tables_bd[join_stuff.tables[0]], function (table_row, index) {
-                var row1 = clone_tables_bd[join_stuff.tables[0]] && clone_tables_bd[join_stuff.tables[0]][index];
-                _.each(tables_bd[join_stuff.tables[1]], function (table_row1, index1) {
-                    if (table_row[join_stuff.columns[0]] === table_row1[join_stuff.columns[1]]) {
-                        var row2 = clone_tables_bd[join_stuff.tables[1]] && clone_tables_bd[join_stuff.tables[1]][index1],
-                            rows = [row1, row2],
-                            compact = _.compact(rows);
-                        if (_.size(compact) === 1) {
-                            result.push(_.extend({}, _.first(compact)));
-                        }
-                        else {
-                            if (from_filter[0] === order1) {
-                                result.push(_.extend({}, row1, row2));
-                            } else {
-                                result.push(_.extend({}, row2, row1));
-                            }
-                        }
-                    }
-                });
-            });
-            return result;
-        },
         whereFilter = function (data_to_filter, where_obj) {
             if (where_obj) {
                 var filters = {
@@ -143,16 +116,76 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 });
             }
         },
+        joinFilter = function (tables_bd, join_stuff, from_filter) {
+            var clone_tables_bd = _.cloneDeep(tables_bd),
+                result = [],
+                order1,
+                join_tables = _.cloneDeep(tables_bd[from_filter[0]]),
+                table_names_db = getTableNames(tables_bd);
+
+            //(!isInStuff(join_stuff.tables, [from_filter[0], join_stuff.on]) ||
+            /**
+             * cannot apply join operation to the same table in case "select 'some stuff' from TABLE join TABLE ..."
+             */
+            if (from_filter[0] === join_stuff.on) {
+                throw Error('Cannot apply join to the same table');
+            }
+            _.each(join_stuff, function (query) {
+                var left, right;
+                var res = _.map(query.columns, function (column, index) {
+                    var side;
+                    if (_.has(join_tables[0], column)) {
+                        side = column;
+                    }
+                    if (_.has(tables_bd[join_stuff[index]['on']][0], column)) {
+                        side = column;
+                    }
+                    _.map(tables_bd, function (row, index) {
+                        return _.extend(row)
+                    });
+                    return side;
+                });
+
+                //if (_.compact(res).length !== 2) {
+                //    throw Error('Incorrect data in join query!');
+                //}
+
+                console.log(res);
+            });
+
+            //order1 = join_stuff.tables[0];
+            //_.each(tables_bd[join_stuff.tables[0]], function (table_row, index) {
+            //    var row1 = clone_tables_bd[join_stuff.tables[0]] && clone_tables_bd[join_stuff.tables[0]][index];
+            //    _.each(tables_bd[join_stuff.tables[1]], function (table_row1, index1) {
+            //        if (table_row[join_stuff.columns[0]] === table_row1[join_stuff.columns[1]]) {
+            //            var row2 = clone_tables_bd[join_stuff.tables[1]] && clone_tables_bd[join_stuff.tables[1]][index1],
+            //                rows = [row1, row2],
+            //                compact = _.compact(rows);
+            //            if (_.size(compact) === 1) {
+            //                result.push(_.extend({}, _.first(compact)));
+            //            }
+            //            else {
+            //                if (from_filter[0] === order1) {
+            //                    result.push(_.extend({}, row1, row2));
+            //                } else {
+            //                    result.push(_.extend({}, row2, row1));
+            //                }
+            //            }
+            //        }
+            //    });
+            //});
+            //return result;
+        },
+
         SqlEngine = function () {
         };
 
     SqlEngine.prototype = {
         constructor: SqlEngine,
         execute: function (input) {
-            //console.log(parser.parse(input, 0).res);
+            console.log(parser.parse('SELECT ' + input, 0));
             try {
                 input = 'SELECT ' + input;
-                console.log(input);
                 var res = parser.parse(input, 0) && parser.parse(input, 0).res,
                     select = res.select,
                     tables,
@@ -162,8 +195,8 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 tables = this.gettableCollection();
                 filtered = filterTables(tables, res.from);
                 if (res.join) {
-                    filtered = filterTables(tables, res.join[0]['tables']);
-                    var join_result = joinFilter(filtered, res.join[0], res.from);
+                    //filtered = filterTables(tables, res.join[0]['tables']);
+                    var join_result = joinFilter(tables, res.join, res.from);
                     whereFilter(join_result, res.where);
                     if (res.from !== '*') {
                         filterTablesColumns(join_result, select.tableColumn);

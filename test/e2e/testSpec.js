@@ -3,7 +3,7 @@ describe('guering', function () {
     beforeEach(function () {
         input = $('#enter-input');
         global.isAngularSite(false);
-        browser.get('http://localhost:63342/tdd_and_e2e/src/index.html');
+        browser.get('http://localhost:63343/tdd_and_e2e/src/index.html');
     });
 
     it('fiil some stuff into input', function () {

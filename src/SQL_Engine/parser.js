@@ -75,28 +75,6 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
         }));
     }();
 
-    joinBlock = function () {
-        return parserCore.seq(
-            join,
-            ws,
-            table,
-            ws,
-            on,
-            ws,
-            table_column,
-            ws,
-            equal,
-            ws,
-            table_column
-        ).then(function (r) {
-                return [{
-                    on: r[2],
-                    tables: [r[6]['table'], r[10]['table']],
-                    columns: [r[6]['table'] + '.' + r[6]['column'], r[10]['table'] + '.' + r[10]['column']]
-                }];
-            });
-    }();
-
     whereOperator = (function () {
         var operators = ['>=', '<=', '<>', '>', '<'];
         operators = operators.map(function (operator) {
@@ -177,6 +155,29 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             });
     }());
 
+    joinBlock = function () {
+        return parserCore.rep(
+            parserCore.seq(
+                join,
+                ws,
+                table,
+                ws,
+                on,
+                ws,
+                table_column,
+                ws,
+                equal,
+                ws,
+                table_column).then(function (r) {
+                    return {
+                        on: r[2],
+                        //tables: [r[6]['table'], r[10]['table']],
+                        columns: [r[6]['table'] + '.' + r[6]['column'], r[10]['table'] + '.' + r[10]['column']]
+                    };
+                }), ws
+        )
+    }();
+
     parse = function (str, pos) {
         return parserCore.seq(
             select,
@@ -186,19 +187,22 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             from,
             ws,
             tableName,
-            parserCore.opt(parserCore.seq(ws, joinBlock)),
-            parserCore.opt(parserCore.seq(ws, whereBlock)
-            )).then(function (result, last_index, initial_str) {
+            parserCore.opt(parserCore.seq(ws, joinBlock).then(function (r) { return r[1]; })),
+            parserCore.opt(parserCore.seq(ws, whereBlock).then(function (r) { return r[1]; }))
+        ).then(function (result, last_index, initial_str) {
                 var parsed_result = {
                     select: result[2],
                     from: result[6]
                 };
                 if (result[7]) {
-                    parsed_result['join'] = result[7][1];
+                    parsed_result['join'] = result[7];
                 }
                 if (result[8]) {
-                    parsed_result['where'] = result[8][1];
+                    parsed_result['where'] = result[8];
                 }
+                /**
+                 * if end of the string then return parsed stuff
+                 */
                 if (last_index === initial_str.length) {
                     return parsed_result;
                 }
