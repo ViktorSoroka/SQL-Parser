@@ -106,11 +106,12 @@ caption {
 
 #enter-input {
     height: 34px;
-    line-height: 20px;
+    line-height: 25px;
     display: inline-block;
     vertical-align: middle;
     color: #50A1DB;
     font-size: 20px;
+    padding: 0;
     position: relative;
     font-family: 'Molengo', Verdana, Arial, Helvetica, sans-serif;
 }

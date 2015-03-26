@@ -70,7 +70,6 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             });
             return {
                 tableColumn: _.flatten(_.pluck(result, 'columns'))
-                //tables: tables
             };
         }));
     }();
@@ -171,7 +170,6 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
                 table_column).then(function (r) {
                     return {
                         on: r[2],
-                        //tables: [r[6]['table'], r[10]['table']],
                         columns: [r[6]['table'] + '.' + r[6]['column'], r[10]['table'] + '.' + r[10]['column']]
                     };
                 }), ws
