@@ -131,28 +131,31 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 throw Error('Cannot apply join to the same table');
             }
             _.each(join_stuff, function (query) {
-                var left, right;
-                var res = _.map(query.columns, function (column, index) {
-                    var side;
+
+                var sides = {},
+                    table_on_join;
+                _.each(query.columns, function (column, index) {
+                    table_on_join = tables_bd[join_stuff[index]['on']];
+                    console.log(join_tables[0], table_on_join[0]);
                     if (_.has(join_tables[0], column)) {
-                        side = column;
+                        sides.right = column;
                     }
-                    if (_.has(tables_bd[join_stuff[index]['on']][0], column)) {
-                        side = column;
+                    if (_.has(table_on_join[0], column)) {
+                        sides.left = column;
                     }
-                    _.map(tables_bd, function (row, index) {
-                        return _.extend(row)
-                    });
-                    return side;
                 });
-
-                //if (_.compact(res).length !== 2) {
-                //    throw Error('Incorrect data in join query!');
+                //console.log(sides);
+                //if (!!right && !!left && left !== right) {
+                _.each(join_tables, function (row, index, arr) {
+                    arr[index] = _.extend(row, table_on_join[index]);
+                });
+                //console.log(join_tables);
                 //}
-
-                console.log(res);
             });
-
+            //if (_.compact(res).length !== 2) {
+            //    throw Error('Incorrect data in join query!');
+            //}
+            return join_tables;
             //order1 = join_stuff.tables[0];
             //_.each(tables_bd[join_stuff.tables[0]], function (table_row, index) {
             //    var row1 = clone_tables_bd[join_stuff.tables[0]] && clone_tables_bd[join_stuff.tables[0]][index];
