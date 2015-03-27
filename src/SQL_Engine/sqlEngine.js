@@ -7,10 +7,14 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return _.keys(tables);
         },
 
+        getTable = function (table_name, tables) {
+            return table_name && _.cloneDeep(tables[table_name]);
+        },
+
         filterTables = function (tables, filter) {
             var filter_table = _.cloneDeep(tables),
-                tables_names = _.keys(tables);
-            if (!isInStuff(tables_names, filter)) return;
+                tables_names = getTableNames(tables);
+            if (!isInStuff(tables_names, filter)) return undefined;
             _.each(tables_names, function (table_name) {
                 if (!_.includes(filter, table_name)) {
                     delete filter_table[table_name];
@@ -21,12 +25,12 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
 
         crossJoin = function (tables) {
             var result_obj = {},
-                tables_names = _.keysIn(tables);
+                tables_names = getTableNames(tables);
             _.each(tables_names, function (table_name, index) {
                 if (tables_names[index + 1]) {
                     result_obj = [];
                     _.each(_.pick(tables, table_name)[table_name], function (data) {
-                        _.forIn(_.pick(tables, tables_names[index + 1])[tables_names[index + 1]], function (new_data, key) {
+                        _.forIn(_.pick(tables, tables_names[index + 1])[tables_names[index + 1]], function (new_data) {
                             result_obj.push(_.extend({}, data, new_data));
                         });
                     });
@@ -102,11 +106,9 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         joinFilter = function (tables_bd, join_stuff, from_filter) {
-            var clone_tables_bd = _.cloneDeep(tables_bd),
-                join_tables = _.cloneDeep(tables_bd[from_filter[0]]),
-                table_names_db = getTableNames(tables_bd);
+            var join_tables = _.cloneDeep(tables_bd[from_filter[0]]),
+                tables_join_all = _.clone(from_filter);
 
-            //(!isInStuff(join_stuff.tables, [from_filter[0], join_stuff.on]) ||
             /**
              * cannot apply join operation to the same table in case "select 'some stuff' from TABLE join TABLE ..."
              */
@@ -129,6 +131,14 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 if (_.size(_.keys(sides)) !== 2 || sides.left === sides.right) {
                     throw Error('Wrong columns in join block');
                 }
+                /**
+                 * it will be error if the same table use in different join`s computations
+                 * "... join TABLE on... join TABLE on ..."
+                 */
+                if (_.include(tables_join_all, join_stuff[ind]['on'])) {
+                    throw Error('Cannot use the same table in join block more than one time');
+                }
+                tables_join_all.push(join_stuff[ind]['on']);
                 table_on_join = tables_bd[join_stuff[ind]['on']];
                 join_tables = _.map(join_tables, function (row, index) {
                     var prop_left = join_tables[index] && join_tables[index][sides.left],
@@ -138,7 +148,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     }
                 });
             });
-
             return _.compact(join_tables);
         },
 
@@ -148,7 +157,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
     SqlEngine.prototype = {
         constructor: SqlEngine,
         execute: function (input) {
-            console.log(parser.parse('SELECT ' + input, 0));
             try {
                 input = 'SELECT ' + input;
                 var res = parser.parse(input, 0) && parser.parse(input, 0).res,
@@ -163,10 +171,8 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     var join_result = joinFilter(tables, res.join, res.from);
                     whereFilter(join_result, res.where);
                     if (res.from !== '*') {
-                        console.log(_.compact(join_result));
                         filterTablesColumns(join_result, select.tableColumn);
                         generated_table['Sql result'] = join_result;
-
                         return generated_table;
                     }
                 }
@@ -175,7 +181,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     whereFilter(generated_table['Sql result'], res.where);
                     filterTablesColumns(generated_table['Sql result'], select.tableColumn);
                     return generated_table;
-                } else if (_.size(filtered) === res.from.length) {
+                } else if (_.size(filtered) === _.size(res.from)) {
                     generated_table['Sql result'] = crossJoin(filtered);
                     whereFilter(generated_table['Sql result'], res.where);
                     filterTablesColumns(generated_table['Sql result'], select.tableColumn);
@@ -188,9 +194,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
         },
         setDb: function (data) {
             this._dataBase = new SQL_DB(data);
-        },
-        getTable: function (table_name) {
-            return table_name && _.cloneDeep(this._dataBase.getStructure()[table_name]);
         },
         gettableCollection: function () {
             var clone_structure = _.cloneDeep(this._dataBase.getStructure()),
@@ -206,9 +209,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 });
             });
             return obj;
-        },
-        removeTable: function (table_name) {
-            return table_name && _.contains(this._dataBase, this._dataBase[table_name]) && _.pick(this._dataBase, table_name)[table_name];
         }
     };
     return SqlEngine;

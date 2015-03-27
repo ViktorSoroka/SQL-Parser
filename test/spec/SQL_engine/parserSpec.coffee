@@ -13,7 +13,6 @@ define (require) ->
       expect(parser.joinBlock.exec('Join Table1 on Table1.column_some = Table2.column_another', 0)).toEqual
         res: [{
             on: 'Table1'
-            tables: ['Table1', 'Table2']
             columns: ['Table1.column_some', 'Table2.column_another']
           }]
         end: 57
@@ -195,7 +194,6 @@ define (require) ->
           join: [{
               on: 'Customers'
               columns: ['Customers.id', 'Table.id']
-              tables: ['Customers', 'Table']
             }]
           where: [
               operator: '>'

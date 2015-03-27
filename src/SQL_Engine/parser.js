@@ -99,9 +99,6 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             wso,
             parserCore.any(digit, quotesPattern(column_stuff), table_column)
         )).then(function (r) {
-            //if (r[0] !== '=' && !isFinite(r[2])) {
-            //    return undefined;
-            //}
             return {
                 operator: r[0],
                 right: r[2].table ? r[2]['table'] + '.' + r[2]['column'] : r[2]

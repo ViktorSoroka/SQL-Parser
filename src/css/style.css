@@ -2,7 +2,7 @@ body {
     font-size: 20px;
     margin: 20px;
     font-family: 'Pathway Gothic One', Arial sans-serif;
-    background: url(../images/clean-sky-hd-wallpapers.jpg) no-repeat center center fixed;
+    background: url(../images/img-bg.jpg) no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -111,7 +111,8 @@ caption {
     vertical-align: middle;
     color: #50A1DB;
     font-size: 20px;
-    padding: 0;
+    padding-top: 0;
+    padding-bottom: 0;
     position: relative;
     font-family: 'Molengo', Verdana, Arial, Helvetica, sans-serif;
 }
