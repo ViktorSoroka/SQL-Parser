@@ -83,7 +83,7 @@ define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], functio
         };
 
     getDB('SQL_Engine/db_light.json').then(function () {
-        render(sql_engine.gettableCollection());
+        render(sql_engine.getDbStuff());
 
         $(document).on('submit', '.parser-form', function (e) {
             e.preventDefault();
@@ -104,7 +104,7 @@ define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], functio
         $btn_reset.on('click', function () {
             cleanQueryHoolder();
             removeErrorMessage();
-            render(sql_engine.gettableCollection());
+            render(sql_engine.getDbStuff());
         });
 
         $enter_input.on('input', function () {

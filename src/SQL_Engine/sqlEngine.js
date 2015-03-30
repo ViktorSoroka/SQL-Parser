@@ -44,7 +44,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
 
         filterTablesColumns = function (table, columns) {
             if (columns) {
-                var keys = _.keys(table[0]);
+                var keys = _.keys(_.compact(table)[0]);
                 if (!isInStuff(keys, columns)) {
                     throw Error('Some columns don`t present in result table');
                 }
@@ -165,7 +165,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     filtered,
                     generated_table = {};
 
-                tables = this.gettableCollection();
+                tables = this.getDbStuff();
                 filtered = filterTables(tables, res.from);
                 if (res.join) {
                     var join_result = joinFilter(tables, res.join, res.from);
@@ -194,8 +194,9 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
         },
         setDb: function (data) {
             this._dataBase = new SQL_DB(data);
+            return this._dataBase;
         },
-        gettableCollection: function () {
+        getDbStuff: function () {
             var clone_structure = _.cloneDeep(this._dataBase.getStructure()),
                 obj = {};
             _.forIn(clone_structure, function (table, table_name) {
