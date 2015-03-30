@@ -7,9 +7,16 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return _.keys(tables);
         },
 
-        getTable = function (table_name, tables) {
-            return table_name && _.cloneDeep(tables[table_name]);
+        removeItemsArray = function (arr, item) {
+            for (var i = arr.length; i--;) {
+                if (arr[i] === item) {
+                    arr.splice(i, 1);
+                }
+            }
         },
+    //getTable = function (table_name, tables) {
+    //    return table_name && _.cloneDeep(tables[table_name]);
+    //},
 
         filterTables = function (tables, filter) {
             var filter_table = _.cloneDeep(tables),
@@ -81,7 +88,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                         return expect <= value;
                     }
                 };
-                _.each(data_to_filter, function (row, row_name) {
+                _.each(data_to_filter, function (row, row_index) {
                     if (where_obj.length === 1 || (where_obj[1] && where_obj[1].boolean === 'and')) {
                         var left,
                             right,
@@ -100,9 +107,10 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                         });
                     }
                     if (!flag) {
-                        delete data_to_filter[row_name]
+                        delete data_to_filter[row_index];
                     }
                 });
+                removeItemsArray(data_to_filter, undefined);
             }
         },
         joinFilter = function (tables_bd, join_stuff, from_filter) {
@@ -143,7 +151,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 join_tables = _.map(join_tables, function (row, index) {
                     var prop_left = join_tables[index] && join_tables[index][sides.left],
                         prop_right = table_on_join[index] && table_on_join[index][sides.right];
-                    if(prop_left === prop_right) {
+                    if (prop_left === prop_right) {
                         return _.extend(row, table_on_join[index]);
                     }
                 });
@@ -172,32 +180,33 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     whereFilter(join_result, res.where);
                     if (res.from !== '*') {
                         filterTablesColumns(join_result, select.tableColumn);
-                        generated_table['Sql result'] = join_result;
+                        generated_table['Sql_result'] = join_result;
                         return generated_table;
                     }
                 }
                 if (_.size(filtered) === 1) {
-                    generated_table['Sql result'] = filtered[_.keys(filtered)[0]];
-                    whereFilter(generated_table['Sql result'], res.where);
-                    filterTablesColumns(generated_table['Sql result'], select.tableColumn);
+                    generated_table['Sql_result'] = filtered[_.keys(filtered)[0]];
+                    whereFilter(generated_table['Sql_result'], res.where);
+                    filterTablesColumns(generated_table['Sql_result'], select.tableColumn);
                     return generated_table;
                 } else if (_.size(filtered) === _.size(res.from)) {
-                    generated_table['Sql result'] = crossJoin(filtered);
-                    whereFilter(generated_table['Sql result'], res.where);
-                    filterTablesColumns(generated_table['Sql result'], select.tableColumn);
+                    generated_table['Sql_result'] = crossJoin(filtered);
+                    whereFilter(generated_table['Sql_result'], res.where);
+                    filterTablesColumns(generated_table['Sql_result'], select.tableColumn);
                     return generated_table;
                 }
             }
             catch (e) {
-                console.log(e.message + ' ' + e.stack);
+                //console.log(e.message + ' ' + e.stack);
+                return 'Error state';
             }
         },
         setDb: function (data) {
-            this._dataBase = new SQL_DB(data);
+            this._dataBase = new SQL_DB(data).getStructure();
             return this._dataBase;
         },
         getDbStuff: function () {
-            var clone_structure = _.cloneDeep(this._dataBase.getStructure()),
+            var clone_structure = _.cloneDeep(this._dataBase),
                 obj = {};
             _.forIn(clone_structure, function (table, table_name) {
                 obj[table_name] = [];
@@ -213,4 +222,5 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
         }
     };
     return SqlEngine;
-});
+})
+;

@@ -1,9 +1,9 @@
 define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], function (SqlEngine, tpl) {
 
-    var $enter_input = $('#enter-input'),
+    var sql_engine = new SqlEngine,
+        $enter_input = $('#enter-input'),
         $enter_input_wrap = $('#enter-input-wrap'),
         $btn_reset = $('#btn-reset'),
-        sql_engine = new SqlEngine,
         $root_holder = $("#target"),
     /**
      * @external Promise
@@ -89,7 +89,7 @@ define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], functio
             e.preventDefault();
             var text_parse = getTextToParse(),
                 parsed = sql_engine.execute(text_parse);
-            if (parsed) {
+            if (Object.prototype.toString.call(parsed).slice(8, -1) === 'Object') {
                 validStyleParse($enter_input_wrap);
                 cleanQueryHoolder();
                 render(parsed);

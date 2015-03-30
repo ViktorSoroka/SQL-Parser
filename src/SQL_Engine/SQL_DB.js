@@ -5,7 +5,7 @@ define('SQL_Engine/SQL_DB',['lodash'], function () {
      * @constructor
      */
     var SQL_DB = function (db) {
-        this._structure = db;
+        this._structure = db || {};
     };
     /**
      * @description - a method which returns a database

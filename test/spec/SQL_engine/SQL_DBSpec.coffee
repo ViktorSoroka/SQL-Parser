@@ -1,33 +1,28 @@
 define (require) ->
 
   SQL_DB = require 'SQL_Engine/SQL_DB'
+  extraSmallDb = __mocks__['extraSmallDB']
+  describe "extraSmallDb", ->
+    it "should be defined", ->
+      expect(extraSmallDb).toBeDefined()
+    it "should be object", ->
+      expect(extraSmallDb).toEqual(jasmine.any Object)
 
   describe "SQL_DB", ->
-
     it "should be defined", ->
       expect(SQL_DB).toEqual(jasmine.any Function)
 
     describe "getStructure", ->
       db = null
-      dataToDb =
-        one: [
-          { id: 1, name: "Ron" },
-          { id: 2, name: "Rive" }
-        ],
-        two: [
-          { id: 1, name: "Kira" }
-          { id: 2, name: "Bill" }
-        ]
-
       beforeEach ( ->
-        db = new SQL_DB dataToDb
+        db = new SQL_DB extraSmallDb
       )
 
       it "should be defined", ->
         expect(db.getStructure).toEqual(jasmine.any Function)
 
       it "should return the data", ->
-        expect(db.getStructure()).toEqual(dataToDb)
+        expect(db.getStructure()).toEqual(extraSmallDb)
 
       it "should clone the data", ->
-        expect(db.getStructure()).not.toBe(dataToDb)
+        expect(db.getStructure()).not.toBe(extraSmallDb)
