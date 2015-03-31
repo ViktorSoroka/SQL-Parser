@@ -81,7 +81,7 @@ define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], functio
         cleanQueryHoolder = function () {
             $root_holder.empty();
         };
-
+    //getDB('SQL_Engine/db_light.json').then(function () {
     getDB('SQL_Engine/db_light.json').then(function () {
         render(sql_engine.getDbStuff());
 

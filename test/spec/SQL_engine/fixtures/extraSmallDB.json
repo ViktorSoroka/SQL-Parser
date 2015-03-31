@@ -6,5 +6,9 @@
   "two": [
     { "id": 1, "name": "Kira" },
     { "id": 2, "name": "Bill" }
+  ],
+  "three": [
+    { "id": 1, "name": "Poll" },
+    { "id": 2, "name": "Don" }
   ]
 }

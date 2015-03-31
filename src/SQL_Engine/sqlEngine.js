@@ -14,9 +14,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 }
             }
         },
-    //getTable = function (table_name, tables) {
-    //    return table_name && _.cloneDeep(tables[table_name]);
-    //},
 
         filterTables = function (tables, filter) {
             var filter_table = _.cloneDeep(tables),
@@ -42,7 +39,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                         });
                     });
                     if (tables_names[index + 2]) {
-                        _.pick(tables, tables_names[index + 1])[tables_names[index + 1]] = result_obj;
+                        tables[tables_names[index + 1]] = result_obj;
                     }
                 }
             });
@@ -116,36 +113,39 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
         joinFilter = function (tables_bd, join_stuff, from_filter) {
             var join_tables = _.cloneDeep(tables_bd[from_filter[0]]),
                 tables_join_all = _.clone(from_filter);
+            console.log(from_filter);
 
             /**
-             * cannot apply join operation to the same table in case "select 'some stuff' from TABLE join TABLE ..."
-             */
+            * cannot apply join operation to the same table in case "select 'some stuff' from TABLE join TABLE ..."
+            */
             if (from_filter[0] === join_stuff.on) {
                 throw Error('Cannot apply join to the same table');
             }
+            console.log(join_stuff, 'join_stuff');
             _.each(join_stuff, function (query, ind) {
+                console.log(tables_bd[join_stuff[ind]['on']], 'asdasd');
                 var sides = {},
                     table_on_join = tables_bd[join_stuff[ind]['on']];
-                sides.left = _.findKey(join_tables[0], function (chr, key_name) {
-                    return _.includes(join_stuff[ind].columns, key_name);
-                });
-                sides.right = _.findKey(table_on_join[0], function (chr, key_name) {
-                    return _.includes(join_stuff[ind].columns, key_name);
-                });
+                //sides.left = _.findKey(join_tables[0], function (chr, key_name) {
+                //    return _.includes(join_stuff[ind].columns, key_name);
+                //});
+                //sides.right = _.findKey(table_on_join[0], function (chr, key_name) {
+                //    return _.includes(join_stuff[ind].columns, key_name);
+                //});
                 /**
                  * continue query if properties like "on table1.prop = table2.prop" are presented in their tables
                  * and not the same stuff
                  */
-                if (_.size(_.keys(sides)) !== 2 || sides.left === sides.right) {
-                    throw Error('Wrong columns in join block');
-                }
+                //if (_.size(_.keys(sides)) !== 2 || sides.left === sides.right) {
+                //    throw Error('Wrong columns in join block');
+                //}
                 /**
                  * it will be error if the same table use in different join`s computations
                  * "... join TABLE on... join TABLE on ..."
                  */
-                if (_.include(tables_join_all, join_stuff[ind]['on'])) {
-                    throw Error('Cannot use the same table in join block more than one time');
-                }
+                //if (_.include(tables_join_all, join_stuff[ind]['on'])) {
+                //    throw Error('Cannot use the same table in join block more than one time');
+                //}
                 tables_join_all.push(join_stuff[ind]['on']);
                 table_on_join = tables_bd[join_stuff[ind]['on']];
                 join_tables = _.map(join_tables, function (row, index) {
@@ -157,6 +157,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 });
             });
             return _.compact(join_tables);
+            //return join_tables;
         },
 
         SqlEngine = function () {
@@ -175,14 +176,15 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
 
                 tables = this.getDbStuff();
                 filtered = filterTables(tables, res.from);
+                console.log(res.join);
                 if (res.join) {
                     var join_result = joinFilter(tables, res.join, res.from);
                     whereFilter(join_result, res.where);
-                    if (res.from !== '*') {
+                    if (select !== '*') {
                         filterTablesColumns(join_result, select.tableColumn);
-                        generated_table['Sql_result'] = join_result;
-                        return generated_table;
                     }
+                    generated_table['Sql_result'] = _.compact(join_result);
+                    return join_result;
                 }
                 if (_.size(filtered) === 1) {
                     generated_table['Sql_result'] = filtered[_.keys(filtered)[0]];
@@ -195,6 +197,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     filterTablesColumns(generated_table['Sql_result'], select.tableColumn);
                     return generated_table;
                 }
+                return 'Error state';
             }
             catch (e) {
                 //console.log(e.message + ' ' + e.stack);
