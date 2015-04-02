@@ -1,20 +1,60 @@
 {
-  "one": [
-    { "id": 1, "name": "Ron" },
-    { "id": 2, "name": "Rive" }
+  "director": [
+    {
+      "id": 1,
+      "name": "Joe Carnahan"
+    },
+    {
+      "id": 2,
+      "name": "James Cameron"
+    },
+    {
+      "id": 3,
+      "name": "Joss Whedon"
+    }
   ],
-  "two": [
-    { "id": 1, "name": "Kira" },
-    { "id": 2, "name": "Bill" }
+  "actor": [
+    {
+      "id": 1,
+      "name": "Liam Neeson",
+      "director_id": 5
+    },
+    {
+      "id": 2,
+      "name": "Bradley Cooper",
+      "director_id": 2
+    },
+    {
+      "id": 3,
+      "name": "Jessica Biel",
+      "director_id": 4
+    },
+    {
+      "id": 4,
+      "name": "asdasd",
+      "director_id": 1
+    }
   ],
-  "three": [
-    { "id": 1, "name": "Poll" },
-    { "id": 2, "name": "Don" }
-  ],
-  "four": [
-    { "id": 1, "oneId": 1 },
-    { "id": 2, "oneId": 2 },
-    { "id": 3, "oneId": 1 },
-    { "id": 4, "oneId": 3 }
+  "some_stuff": [
+    {
+      "id": 1,
+      "name": "Liam Neeson",
+      "director_id": 5
+    },
+    {
+      "id": 2,
+      "name": "Bradley Cooper",
+      "director_id": 2
+    },
+    {
+      "id": 3,
+      "name": "Jessica Biel",
+      "director_id": 4
+    },
+    {
+      "id": 4,
+      "name": "asdasd",
+      "director_id": 1
+    }
   ]
 }
