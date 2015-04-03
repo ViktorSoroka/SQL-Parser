@@ -1,26 +1,26 @@
 define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodash', 'jquery'], function (parser, SQL_DB) {
     'use strict';
     /**
-     * @description
-     * @param stuff
-     * @param in_stuff
-     * @returns {boolean}
+     * @description - it checks that the values from the 'in_stuff' array almost consist in the 'stuff' array
+     * @param stuff {Array} - an array to check in
+     * @param in_stuff {Array} - an array to check for
+     * @returns {boolean} - true if consist else false
      */
     var isInStuff = function (stuff, in_stuff) {
             return _.size(_.difference(stuff, in_stuff)) === _.size(stuff) - _.size(in_stuff);
         },
         /**
-         * @description - get only names of tables from the some DB
-         * @param tables {Object} - tables
+         * @description - get only the names of the tables from the some DB
+         * @param tables {Object} - the tables
          * @returns {Array}
          */
         getTableNames = function (tables) {
             return _.keys(tables);
         },
         /**
-         * @description - removes items from the array
-         * @param arr {Array}
-         * @param item {String | Number}
+         * @description - removes the items from an array
+         * @param arr {Array} - an array to remove the items from
+         * @param item {String | Number} - the items to remove
          */
         removeItemsArray = function (arr, item) {
             var i;
@@ -31,10 +31,10 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         /**
-         * @description
-         * @param tables
-         * @param filter
-         * @returns {*}
+         * @description - filters passed in 'table' by passed in 'columns'
+         * @param tables {Object} - the list of tables to filter
+         * @param filter {Array} - the tables names for filter
+         * @returns {Object} - the filtered tables
          */
         filterTables = function (tables, filter) {
             var filter_table = _.cloneDeep(tables),
@@ -50,10 +50,10 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return filter_table;
         },
         /**
-         * @description
-         * @param table
-         * @param columns
-         * @returns {*}
+         * @description - filters passed in 'table' by passed in 'columns'
+         * @param table {Array.<Object>} - the table to filter
+         * @param columns {Array} - the columns for filter
+         * @returns {Array.<Object>} - the filtered table
          */
         filterTablesColumns = function (table, columns) {
             if (columns) {
@@ -72,9 +72,9 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         /**
-         * @description - WHERE part of SQL query
-         * @param data_to_filter
-         * @param where_obj
+         * @description - WHERE part of the SQL query
+         * @param data_to_filter {Array.<Object>} - the table to filter
+         * @param where_obj {Array.<Object>} - the WHERE stuff to filter by
          */
         whereFilter = function (data_to_filter, where_obj) {
             if (where_obj) {
@@ -124,9 +124,9 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         /**
-         * @DESCRIPTION - CROSS-JOIN part of SQL query
-         * @param tables
-         * @returns {{}}
+         * @description - CROSS-JOIN part of SQL query
+         * @param tables {Object} - the tables list for CROSS-JOIN operation
+         * @returns {Array.<Object>} - the result table
          */
         crossJoin = function (tables) {
             var result_obj = {},
@@ -147,19 +147,19 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return result_obj;
         },
         /**
-         * @description - JOIN part of SQL query
-         * @param tables_bd
-         * @param join_stuff
-         * @param from_filter
-         * @returns {*}
+         * @description - JOIN part of the SQL query
+         * @param tables_bd {Object} - the tables database
+         * @param join_stuff {Array.<Object>} - the JOIN stuff to filter by
+         * @param from_filter {String} - table`s name which presented in FROM part
+         * @returns {Array.<Object>} - the result table
          */
         joinFilter = function (tables_bd, join_stuff, from_filter) {
-            var join_tables = _.cloneDeep(tables_bd[from_filter[0]]),
-                tables_join_all = _.clone(from_filter);
+            var join_tables = _.cloneDeep(tables_bd[from_filter]),
+                tables_join_all = [from_filter];
             /**
              * cannot apply join operation to the same table in case "select 'some stuff' from TABLE join TABLE ..."
              */
-            if (from_filter[0] === join_stuff[0].on) {
+            if (from_filter === join_stuff[0]['on']) {
                 throw Error('Cannot apply join to the same table');
             }
 
@@ -220,7 +220,10 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             });
             return join_tables;
         },
-
+        /**
+         * @description - SqlEngine constructor with shared methods
+         * @constructor
+         */
         SqlEngine = function () {
         };
 
@@ -228,8 +231,8 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
         constructor: SqlEngine,
         /**
          * @description - executes the query
-         * @param input {String} - SQL query
-         * @returns {Object}
+         * @param input {String} - the SQL query
+         * @returns {Object} - the data to render
          */
         execute: function (input) {
             try {
@@ -242,7 +245,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 tables = this.getDbStuff();
                 filtered = filterTables(tables, res.from);
                 if (res.join) {
-                    var join_result = joinFilter(tables, res.join, res.from);
+                    var join_result = joinFilter(tables, res.join, res.from[0]);
                     whereFilter(join_result, res.where);
                     if (select !== '*') {
                         filterTablesColumns(join_result, select.tableColumn);
@@ -272,17 +275,17 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         /**
-         * @description
-         * @param data
-         * @returns {Object|*}
+         * @description - for setting the some database for further query operations
+         * @param data {Object} - the stuff to set
+         * @returns {Object} - the database
          */
         setDb: function (data) {
             this._dataBase = new SQL_DB(data).getStructure();
             return this._dataBase;
         },
         /**
-         * @description
-         * @returns {{}}
+         * @description - for getting data from current database
+         * @returns {Object} the cloned database
          */
         getDbStuff: function () {
             var clone_structure = _.cloneDeep(this._dataBase),
