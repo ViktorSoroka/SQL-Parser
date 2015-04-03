@@ -1,8 +1,9 @@
 define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parserCore) {
     'use strict';
+    // get some pattern and changed it`s result to lover case
     var pattetnToLoverCase = function (pattern) {
-            return pattern.then(function (r) {
-                return r.toLowerCase();
+            return pattern.then(function (result) {
+                return result.toLowerCase();
             });
         },
         all = parserCore.txt('*'),
@@ -31,12 +32,13 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
         whereOperatorValue,
         parse;
 
+    // Pattern for parsing table name and table column
     table_column = parserCore.seq(table, parserCore.txt('.'), column).then(function (parsed_result) {
         return {table: parsed_result[0], column: parsed_result[2]};
     });
-
+    // Pattern for parsing multiple table names
     tableName = parserCore.rep(table, parserCore.rgx(/,\s*/));
-
+    // Pattern for parsing tables columns
     tableColumn = (function () {
         return parserCore.any(all, parserCore.rep(table_column, parserCore.rgx(/,\s*/)).then(function (parse_result) {
             var result = [],
@@ -73,7 +75,10 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             };
         }));
     }());
-
+    /**
+     * @description - Pattern for WHERE block
+     * @returns {Pattern}
+     */
     whereOperator = (function () {
         var operators = ['>=', '<=', '<>', '>', '<'];
         operators = operators.map(function (operator) {
@@ -81,14 +86,21 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
         });
         return parserCore.any.apply(null, operators);
     }());
-
+    /**
+     * @description - Pattern for cases when quote("" or '') founded
+     * @param pattern - some pattern between the quotes
+     * @returns {Pattern}
+     */
     quotesPattern = function (pattern) {
         var quote = parserCore.rgx(/["']/);
         return parserCore.seq(quote, pattern, quote).then(function (parsed_result) {
             return parsed_result[0] === parsed_result[2] ? parsed_result[1] : undefined;
         });
     };
-
+    /**
+     * @description - Pattern for part of WHERE condition 'where table1.col1 = table2.col2'
+     * @returns {Pattern}
+     */
     whereOperatorValue = (function () {
         return parserCore.any(parserCore.seq(
             whereOperator,
@@ -105,7 +117,11 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             };
         });
     }());
-
+    /**
+     * @description - Pattern for multiple WHERE conditions
+     * @param pattern - pattern to repeat
+     * @returns {Pattern}
+     */
     wherePatternBlock = function (pattern) {
         return parserCore.seq(ws, parserCore.rep(parserCore.seq(
             pattern,
@@ -125,7 +141,10 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             return result[1];
         });
     };
-
+    /**
+     * @description - Pattern for multiple WHERE conditions (all together)
+     * @returns {Pattern} - pattern for parse WHERE block
+     */
     whereBlock = (function () {
         return parserCore.seq(
             where,
@@ -149,7 +168,10 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
                 }
             });
     }());
-
+    /**
+     * @description - Pattern for multiple JOIN conditions
+     * @returns {Pattern}
+     */
     joinBlock = function () {
         return parserCore.rep(
             parserCore.seq(
@@ -171,7 +193,12 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
                 }), ws
         );
     }();
-
+    /**
+     * @description - Pattern which compound all queries above together
+     * @param str {String} - query
+     * @param pos - position to start from
+     * @returns {Pattern}
+     */
     parse = function (str, pos) {
         return parserCore.seq(
             select,
