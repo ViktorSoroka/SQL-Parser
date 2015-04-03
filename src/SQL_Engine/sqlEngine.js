@@ -72,7 +72,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         /**
-         * @description
+         * @description - WHERE part of SQL query
          * @param data_to_filter
          * @param where_obj
          */
@@ -124,7 +124,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             }
         },
         /**
-         * @description
+         * @DESCRIPTION - CROSS-JOIN part of SQL query
          * @param tables
          * @returns {{}}
          */
@@ -147,7 +147,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             return result_obj;
         },
         /**
-         * @description
+         * @description - JOIN part of SQL query
          * @param tables_bd
          * @param join_stuff
          * @param from_filter
@@ -227,9 +227,9 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
     SqlEngine.prototype = {
         constructor: SqlEngine,
         /**
-         * @description
-         * @param input
-         * @returns {*}
+         * @description - executes the query
+         * @param input {String} - SQL query
+         * @returns {Object}
          */
         execute: function (input) {
             try {
