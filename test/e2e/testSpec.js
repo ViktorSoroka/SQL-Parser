@@ -1,68 +1,54 @@
+'use strict';
+
+var Sql_Engine_Page = require('./sql_Engine_Page.js');
+
 describe('guering', function () {
-    var input;
+    var page;
+
     beforeEach(function () {
-        input = $('#enter-input');
-        global.isAngularSite(false);
-        browser.get('http://localhost:63343/tdd_and_e2e/src/index.html');
+        page = new Sql_Engine_Page();
     });
 
-    it('fiil some stuff into input', function () {
-        expect(input.getAttribute('value')).toEqual('');
-        input.sendKeys('* from actor');
-        expect(input.getAttribute('value')).toEqual('* from actor');
+    it('fiil some stuff into page.queryInput', function () {
+        page.query('* from actor');
+        expect(page.queryInput.getAttribute('value')).toEqual('* from actor');
     });
 
     it('should make a correct schema', function () {
-        browser.wait(function () {
-            return browser.driver.isElementPresent(by.css('#target table'));
-        }, 2000);
-        var todoList;
-        input.sendKeys('* from actor');
-        input.sendKeys(protractor.Key.ENTER);
-        todoList = $$('#target table tbody tr');
-        expect($$('.form-group').getAttribute('class')).toMatch(/has-success/);
-        expect(todoList.count()).toEqual(4);
+        page.readyTableAjax(2000);
+        page.query('* from actor');
+        expect(page.queryInputHolder.getAttribute('class')).toMatch(/has-success/);
+        expect(page.tableRows.count()).toEqual(4);
     });
 
-    it('should be invalid if the wrong data passed in input', function () {
-        input.sendKeys('asdasd').sendKeys(protractor.Key.ENTER);
-        expect($$('.error-state').getAttribute('class')).toMatch(/show/);
+    it('should be invalid if the wrong data passed in page.queryInput', function () {
+        page.query('asdasd');
+        expect(page.errorStateHolder.getAttribute('class')).toMatch(/show/);
     });
 
-    it('should show error message if the wrong data passed in input', function () {
-        input.sendKeys('asdasd').sendKeys(protractor.Key.ENTER);
-        expect($$('.form-group').getAttribute('class')).toMatch(/has-error/);
+    it('should show error message if the wrong data passed in page.queryInput', function () {
+        page.query('asdasd');
+        expect(page.queryInputHolder.getAttribute('class')).toMatch(/has-error/);
     });
 
     it('should return columns passed in guery', function () {
-        browser.wait(function () {
-            return browser.driver.isElementPresent(by.css('#target table'));
-        }, 2000);
-        var columns;
-        input.sendKeys('actor.id, actor.name from actor');
-        input.sendKeys(protractor.Key.ENTER);
-        columns = $$('#target table thead tr th');
-        expect(columns.get(0).getText()).toBe('actor.id');
-        expect(columns.get(1).getText()).toBe('actor.name');
+        page.readyTableAjax(2000);
+        page.query('actor.id, actor.name from actor');
+        expect(page.tableColumns.get(0).getText()).toBe('actor.id');
+        expect(page.tableColumns.get(1).getText()).toBe('actor.name');
     });
 
     it('should render tables from base after load page', function () {
-        browser.wait(function () {
-            return browser.driver.isElementPresent(by.css('#target table'));
-        }, 2000);
-        expect($$('#target table').get(0).isPresent()).toBe(true);
+        page.readyTableAjax(2000);
+        expect(page.tables.get(0).isPresent()).toBe(true);
     });
 
     it('should render tables from base after click on button', function () {
-        browser.wait(function () {
-            return browser.driver.isElementPresent(by.css('#target table'));
-        }, 2000);
-        input.sendKeys('brrr').sendKeys(protractor.Key.ENTER);
-        expect($$('#target table').count()).toBe(0);
-        $('#btn-reset').click();
-        browser.wait(function () {
-            return browser.driver.isElementPresent(by.css('#target table'));
-        }, 2000);
-        expect($$('#target table').count()).not.toBe(0);
+        page.readyTableAjax(2000);
+        page.query('brrr');
+        expect(page.tables.count()).toBe(0);
+        page.showTablesButton.click();
+        page.readyTableAjax(2000);
+        expect(page.tables.count()).not.toBe(0);
     });
 });

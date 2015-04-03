@@ -1,5 +1,5 @@
 require.config({
-    //baseUrl: 'src',
+    baseUrl: '',
     paths: {
         jquery: '../bower_components/jquery/dist/jquery.min',
         lodash: '../bower_components/lodash/lodash.min',
@@ -16,9 +16,6 @@ require.config({
         'text': {
             exports: 'text'
         }
-        //'bootstrap' : {
-        //    "deps" :['jquery']
-        //}
     }
 });
 

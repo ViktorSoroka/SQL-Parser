@@ -1,4 +1,5 @@
 define('SQL_Engine/parserPattern', [], function () {
+    'use strict';
     /**
      * @description - constructor for the patterns
      * @callback func - function which pass as parameter
@@ -19,9 +20,9 @@ define('SQL_Engine/parserPattern', [], function () {
             return new Pattern(function (str, pos) {
                 var result = this.exec(str, pos || 0);
                 return result && {
-                        res: transformedFn(result.res, result.end, str),
-                        end: result.end
-                    }
+                    res: transformedFn(result.res, result.end, str),
+                    end: result.end
+                };
             }.bind(this));
         }
     };

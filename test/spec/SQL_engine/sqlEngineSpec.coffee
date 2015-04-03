@@ -1,5 +1,4 @@
 define (require) ->
-
   Engine = require 'SQL_Engine/sqlEngine'
   mockDb = __mocks__['miniDB']
   extraSmallDb = __mocks__['extraSmallDB']
@@ -15,7 +14,7 @@ define (require) ->
       expect(extraSmallDb).toBeDefined()
     it "should be object", ->
       expect(extraSmallDb).toEqual(jasmine.any Object)
-#
+
   describe "sqlEngine", ->
     engine = null;
     beforeEach( ->
@@ -157,7 +156,8 @@ define (require) ->
         engine.setDb(mockDb)
         expect(engine.execute('* from actor where actor.id = actor.director_id')).toEqual
           Sql_result: [
-            { 'actor.id': 2, 'actor.name': 'Bradley Cooper', 'actor.director_id': 2},
+            { 'actor.id': 1, 'actor.name': 'Liam Neeson', 'actor.director_id': 1 }
+            { 'actor.id': 2, 'actor.name': 'Bradley Cooper', 'actor.director_id': 2 }
           ]
 
       it "should return all result if the condition in the WHERE part is just a boolean", ->
@@ -248,6 +248,7 @@ define (require) ->
             {'one.id': 2, 'one.name': 'Rive', 'two.id': 2, 'two.name': 'Bill', 'three.id': 1, 'three.name': 'Poll'}
             {'one.id': 2, 'one.name': 'Rive', 'two.id': 2, 'two.name': 'Bill', 'three.id': 2, 'three.name': 'Don'}
           ]
+
       it "should be 'Error state' if in Cross-join query presented duplicate tables", ->
         engine.setDb(extraSmallDb)
         expect(engine.execute('* from one, two, one')).toEqual 'Error state'
@@ -260,6 +261,7 @@ define (require) ->
             {'one.id': 1, 'one.name': 'Ron', 'four.id': 3, 'four.one_id': 1}
             {'one.id': 2, 'one.name': 'Rive', 'four.id': 2, 'four.one_id': 2}
           ]
+
       it "should be able to work with JOIN query correctly if the the left side *on Table1.prop = Table2.prop* is changes", ->
         engine.setDb(extraSmallDb)
         expect(engine.execute('* from one join four on four.one_id = one.id')).toEqual
@@ -277,6 +279,47 @@ define (require) ->
             {'one.id': 2, 'four.id': 2}
             {'one.id': 1, 'four.id': 3}
           ]
-      it "should be 'Error state' if JOIN query applied to the same table in *select 'some stuff' from TABLE join TABLE ...*", ->
+
+      it "should be 'Error state' in JOIN query 'tableFrom' equal 'tableON' *select 'some stuff' from tableFrom join tableON ...*", ->
         engine.setDb(extraSmallDb)
-        expect(engine.execute('one.id, four.id from one join one on one.one_id = one.id')).toBe 'Error state'
+        expect(engine.execute('* from one join one on one.one_id = one.id')).toBe 'Error state'
+
+      it "should be 'Error state' in JOIN query some columns not presented in tables *select 'some stuff' from tableFrom join tableON tableFrom.asdjajksd = tableFrom.asd ...*", ->
+        engine.setDb(extraSmallDb)
+        expect(engine.execute('* from one join two on one.one_id = two.asdasd')).toBe 'Error state'
+        expect(engine.execute('* from one join two on one.asdasd = two.id')).toBe 'Error state'
+
+      it "should be able to compute multiple joins in JOIN query", ->
+        engine.setDb(extraSmallDb)
+        expect(engine.execute('* from one join four on four.one_id = one.id join two on one.id = two.id')).toEqual
+          Sql_result:  [
+            {'one.id': 1, 'one.name': 'Ron', 'four.id': 1, 'four.one_id': 1, 'two.id': 1, 'two.name': 'Kira'}
+            {'one.id': 2, 'one.name': 'Rive', 'four.id': 2, 'four.one_id': 2, 'two.id': 2, 'two.name': 'Bill'}
+            {'one.id': 1, 'one.name': 'Ron', 'four.id': 3, 'four.one_id': 1, 'two.id': 1, 'two.name': 'Kira'}
+          ]
+        expect(engine.execute('* from one join four on four.one_id = one.id join two on two.id = one.id')).toEqual
+          Sql_result:  [
+            {'one.id': 1, 'one.name': 'Ron', 'four.id': 1, 'four.one_id': 1, 'two.id': 1, 'two.name': 'Kira'}
+            {'one.id': 1, 'one.name': 'Ron', 'four.id': 3, 'four.one_id': 1, 'two.id': 1, 'two.name': 'Kira'}
+            {'one.id': 2, 'one.name': 'Rive', 'four.id': 2, 'four.one_id': 2, 'two.id': 2, 'two.name': 'Bill'}
+          ]
+
+      it "should be 'Error state' in multiple JOIN query if some table presented in query more than one time", ->
+        engine.setDb(extraSmallDb)
+        expect(engine.execute('* from one join four on four.one_id = one.id join four on one.id = four.id')).toBe 'Error state'
+
+      it "should be 'Error state' in multiple JOIN query if some table presented in query more than one time", ->
+        engine.setDb(extraSmallDb)
+        expect(engine.execute('* from one join four on four.one_id = one.id join four on one.id = four.id')).toBe 'Error state'
+
+      it "should work all together", ->
+        engine.setDb(mockDb)
+        expect(engine.execute('actor.id, director.name, some_stuff.director_id from actor join director on director.id = actor.director_id join some_stuff on some_stuff.id = actor.id where actor.id = 2 or actor.id <2')).toEqual
+          Sql_result: [
+            { 'actor.id': 1, 'director.name': 'Joe Carnahan', 'some_stuff.director_id': 5}
+            { 'actor.id': 2, 'director.name': 'James Cameron', 'some_stuff.director_id': 2}
+          ]
+        expect(engine.execute('actor.id, director.name, some_stuff.director_id from actor join director on director.id = actor.director_id join some_stuff on some_stuff.id = actor.id where actor.id <= 2 and director.name = "Joe Carnahan"')).toEqual
+          Sql_result: [
+            { 'actor.id': 1, 'director.name': 'Joe Carnahan', 'some_stuff.director_id': 5}
+          ]

@@ -1,4 +1,6 @@
-define('SQL_Engine/SQL_DB',['lodash'], function () {
+define('SQL_Engine/SQL_DB', ['lodash'], function () {
+    'use strict';
+
     /**
      * @description - a constructor for creating databases
      * @param db {Object} - some database which then will store in the instance of a constructor

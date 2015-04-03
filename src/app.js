@@ -1,6 +1,6 @@
 define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], function (SqlEngine, tpl) {
-
-    var sql_engine = new SqlEngine,
+    'use strict';
+    var sql_engine = new SqlEngine(),
         $enter_input = $('#enter-input'),
         $enter_input_wrap = $('#enter-input-wrap'),
         $btn_reset = $('#btn-reset'),
@@ -29,7 +29,8 @@ define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], functio
          * @param tables {Object}
          */
         render = function (tables) {
-            for (var table in tables) {
+            var table;
+            for (table in tables) {
                 if (tables.hasOwnProperty(table)) {
                     $root_holder.append(template({item: tables[table], table_name: table}));
                 }
@@ -92,8 +93,7 @@ define('app', ['SQL_Engine/sqlEngine', 'text!SQL_Engine/template.html'], functio
                 validStyleParse($enter_input_wrap);
                 cleanQueryHoolder();
                 render(parsed);
-            }
-            else {
+            } else {
                 cleanQueryHoolder();
                 createErrorMessage();
                 invalidStyleParse($enter_input_wrap);

@@ -1,5 +1,5 @@
 define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parserCore) {
-
+    'use strict';
     var pattetnToLoverCase = function (pattern) {
             return pattern.then(function (r) {
                 return r.toLowerCase();
@@ -31,13 +31,13 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
         whereOperatorValue,
         parse;
 
-    table_column = parserCore.seq(table, parserCore.txt('.'), column).then(function (r) {
-        return {table: r[0], column: r[2]};
+    table_column = parserCore.seq(table, parserCore.txt('.'), column).then(function (parsed_result) {
+        return {table: parsed_result[0], column: parsed_result[2]};
     });
 
     tableName = parserCore.rep(table, parserCore.rgx(/,\s*/));
 
-    tableColumn = function () {
+    tableColumn = (function () {
         return parserCore.any(all, parserCore.rep(table_column, parserCore.rgx(/,\s*/)).then(function (parse_result) {
             var result = [],
                 flag = false,
@@ -50,7 +50,7 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
                         if (res['table'] === val['table']) {
                             res['columns'].push(val['table'] + '.' + val['column']);
                             flag = false;
-                        } else if (tables.indexOf(val['from']) === -1) {
+                        } else if (tables.indexOf(val['table']) === -1) {
                             obj['table'] = val['table'];
                             tables.push(obj['table']);
                             obj['columns'].push(val['table'] + '.' + val['column']);
@@ -72,7 +72,7 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
                 tableColumn: _.flatten(_.pluck(result, 'columns'))
             };
         }));
-    }();
+    }());
 
     whereOperator = (function () {
         var operators = ['>=', '<=', '<>', '>', '<'];
@@ -84,8 +84,8 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
 
     quotesPattern = function (pattern) {
         var quote = parserCore.rgx(/["']/);
-        return parserCore.seq(quote, pattern, quote).then(function (r) {
-            return r[0] === r[2] ? r[1] : undefined;
+        return parserCore.seq(quote, pattern, quote).then(function (parsed_result) {
+            return parsed_result[0] === parsed_result[2] ? parsed_result[1] : undefined;
         });
     };
 
@@ -98,33 +98,32 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             equal,
             wso,
             parserCore.any(digit, quotesPattern(column_stuff), table_column)
-        )).then(function (r) {
+        )).then(function (parsed_result) {
             return {
-                operator: r[0],
-                right: r[2].table ? r[2]['table'] + '.' + r[2]['column'] : r[2]
+                operator: parsed_result[0],
+                right: parsed_result[2].table ? parsed_result[2]['table'] + '.' + parsed_result[2]['column'] : parsed_result[2]
             };
         });
     }());
 
     wherePatternBlock = function (pattern) {
         return parserCore.seq(ws, parserCore.rep(parserCore.seq(
-                pattern,
-                ws,
-                parserCore.any(digit, quotesPattern(column_stuff), table_column),
-                ws,
-                whereOperatorValue
-            ).then(function (r) {
-                    if (r[4]) return {
-                        boolean: r[0],
-                        operator: r[4]['operator'],
-                        left: r[2].table ? r[2]['table'] + '.' + r[2]['column'] : r[2],
-                        right: r[4].table ? r[4]['table'] + '.' + r[4]['column'] : r[4].right
-                    }
-                }
-            ), ws)
+            pattern,
+            ws,
+            parserCore.any(digit, quotesPattern(column_stuff), table_column),
+            ws,
+            whereOperatorValue
+        ).then(function (parsed_result) {
+            if (parsed_result[4]) return {
+                boolean: parsed_result[0],
+                operator: parsed_result[4]['operator'],
+                left: parsed_result[2].table ? parsed_result[2]['table'] + '.' + parsed_result[2]['column'] : parsed_result[2],
+                right: parsed_result[4].table ? parsed_result[4]['table'] + '.' + parsed_result[4]['column'] : parsed_result[4].right
+            };
+        }), ws)
         ).then(function (result) {
-                return result[1];
-            });
+            return result[1];
+        });
     };
 
     whereBlock = (function () {
@@ -164,13 +163,13 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
                 ws,
                 equal,
                 ws,
-                table_column).then(function (r) {
+                table_column).then(function (parsed_result) {
                     return {
-                        on: r[2],
-                        columns: [r[6]['table'] + '.' + r[6]['column'], r[10]['table'] + '.' + r[10]['column']]
+                        on: parsed_result[2],
+                        columns: [parsed_result[6]['table'] + '.' + parsed_result[6]['column'], parsed_result[10]['table'] + '.' + parsed_result[10]['column']]
                     };
                 }), ws
-        )
+        );
     }();
 
     parse = function (str, pos) {
@@ -182,8 +181,12 @@ define('SQL_Engine/parser', ['SQL_Engine/parserCore', 'lodash'], function (parse
             from,
             ws,
             tableName,
-            parserCore.opt(parserCore.seq(ws, joinBlock).then(function (r) { return r[1]; })),
-            parserCore.opt(parserCore.seq(ws, whereBlock).then(function (r) { return r[1]; }))
+            parserCore.opt(parserCore.seq(ws, joinBlock).then(function (parsed_result) {
+                return parsed_result[1];
+            })),
+            parserCore.opt(parserCore.seq(ws, whereBlock).then(function (parsed_result) {
+                return parsed_result[1];
+            }))
         ).then(function (result, last_index, initial_str) {
                 var parsed_result = {
                     select: result[2],

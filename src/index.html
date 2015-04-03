@@ -3,7 +3,6 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Parser Sql</title>
-    <!-- Latest compiled and minified CSS -->
     <link href='http://fonts.googleapis.com/css?family=Molengo' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,700,300)' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=PT+Sans+Narrow' rel='stylesheet' type='text/css'>
@@ -12,9 +11,9 @@
     <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-<div id="wrapper">
+<main id="wrapper">
     <header class="container clearfix">SQL Parser</header>
-    <div class="container parser-wrap">
+    <section class="container parser-wrap">
         <div class="row">
             <div class="col-md-10">
                 <form class="parser-form" autocomplete="off">
@@ -22,7 +21,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">SELECT</span>
                             <input type="text" class="form-control" id="enter-input"
-                                   value="* from actor join director on director.id = actor.director_id join some_stuff on some_stuff.id = actor.id"
+                                   value=""
                                    placeholder="Enter some some sql statement and press &quot;Enter&quot; to execute it...">
                         </div>
                         <span class="error-state">There is no data due you query or it is wrong!</span>
@@ -34,8 +33,8 @@
             </div>
         </div>
         <div id="target"></div>
-    </div>
-</div>
+    </section>
+</main>
 
 <!-- Latest compiled and minified JavaScript -->
 <script data-main="main" src="../node_modules/requirejs/require.js"></script>

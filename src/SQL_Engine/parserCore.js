@@ -1,4 +1,5 @@
 define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern) {
+    'use strict';
     var slice = Array.prototype.slice;
     return {
         /**
@@ -8,7 +9,7 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
          */
         txt: function (text) {
             return new Pattern(function (str, pos) {
-                if (str.substr(pos, text.length) == text) {
+                if (str.substr(pos, text.length) === text) {
                     return {res: text, end: pos + text.length};
                 }
             });
@@ -36,9 +37,9 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
             return new Pattern(function (str, pos) {
                 var result = pattern.exec(str, pos);
                 return result || {
-                        res: undefined,
-                        end: pos
-                    };
+                    res: undefined,
+                    end: pos
+                };
             });
         },
         /**
@@ -92,15 +93,17 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
                 pos = pos || 0;
                 args.every(function (pars) {
                     result_parser = pars.exec(str, pos);
-                    if (!result_parser) return false;
+                    if (!result_parser) {
+                        return undefined;
+                    }
                     result.push(result_parser.res);
                     pos = result_parser.end;
                     return true;
                 });
                 return result_parser && {
-                        res: result,
-                        end: result_parser.end
-                    };
+                    res: result,
+                    end: result_parser.end
+                };
             });
         },
         /**
@@ -111,13 +114,15 @@ define('SQL_Engine/parserCore', ['SQL_Engine/parserPattern'], function (Pattern)
          */
         rep: function (pattern, separator) {
             var separated = !separator ? pattern :
-                this.seq(separator, pattern).then(function (z) {
-                    return z[1];
-                });
+                    this.seq(separator, pattern).then(function (z) {
+                        return z[1];
+                    });
             return new Pattern(function (str, pos) {
                 var result = [],
                     result_parser = pattern.exec(str, pos);
-                if (!result_parser) return;
+                if (!result_parser) {
+                    return undefined;
+                }
                 while (result_parser && result_parser.end > pos) {
                     pos = result_parser.end;
                     result.push(result_parser.res);

@@ -1,24 +1,47 @@
 define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodash', 'jquery'], function (parser, SQL_DB) {
+    'use strict';
+    /**
+     * @description
+     * @param stuff
+     * @param in_stuff
+     * @returns {boolean}
+     */
     var isInStuff = function (stuff, in_stuff) {
             return _.size(_.difference(stuff, in_stuff)) === _.size(stuff) - _.size(in_stuff);
         },
-
+        /**
+         * @description - get only names of tables from the some DB
+         * @param tables {Object} - tables
+         * @returns {Array}
+         */
         getTableNames = function (tables) {
             return _.keys(tables);
         },
-
+        /**
+         * @description - removes items from the array
+         * @param arr {Array}
+         * @param item {String | Number}
+         */
         removeItemsArray = function (arr, item) {
-            for (var i = arr.length; i--;) {
+            var i;
+            for (i = _.size(arr); i--;) {
                 if (arr[i] === item) {
                     arr.splice(i, 1);
                 }
             }
         },
-
+        /**
+         * @description
+         * @param tables
+         * @param filter
+         * @returns {*}
+         */
         filterTables = function (tables, filter) {
             var filter_table = _.cloneDeep(tables),
                 tables_names = getTableNames(tables);
-            if (!isInStuff(tables_names, filter)) return undefined;
+            if (!isInStuff(tables_names, filter)) {
+                return undefined;
+            }
             _.each(tables_names, function (table_name) {
                 if (!_.includes(filter, table_name)) {
                     delete filter_table[table_name];
@@ -26,7 +49,12 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             });
             return filter_table;
         },
-
+        /**
+         * @description
+         * @param table
+         * @param columns
+         * @returns {*}
+         */
         filterTablesColumns = function (table, columns) {
             if (columns) {
                 var keys = _.keys(_.compact(table)[0]);
@@ -43,7 +71,11 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 return table;
             }
         },
-
+        /**
+         * @description
+         * @param data_to_filter
+         * @param where_obj
+         */
         whereFilter = function (data_to_filter, where_obj) {
             if (where_obj) {
                 var filters = {
@@ -67,7 +99,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     }
                 };
                 _.each(data_to_filter, function (row, row_index) {
-                    if (where_obj.length === 1 || (where_obj[1] && where_obj[1].boolean === 'and')) {
+                    if (_.size(where_obj) === 1 || (where_obj[1] && where_obj[1].boolean === 'and')) {
                         var left,
                             right,
                             flag;
@@ -88,10 +120,14 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                         delete data_to_filter[row_index];
                     }
                 });
-                removeItemsArray(data_to_filter, undefined);
+                removeItemsArray(data_to_filter);
             }
         },
-
+        /**
+         * @description
+         * @param tables
+         * @returns {{}}
+         */
         crossJoin = function (tables) {
             var result_obj = {},
                 tables_names = getTableNames(tables);
@@ -110,14 +146,20 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
             });
             return result_obj;
         },
-
+        /**
+         * @description
+         * @param tables_bd
+         * @param join_stuff
+         * @param from_filter
+         * @returns {*}
+         */
         joinFilter = function (tables_bd, join_stuff, from_filter) {
             var join_tables = _.cloneDeep(tables_bd[from_filter[0]]),
                 tables_join_all = _.clone(from_filter);
             /**
              * cannot apply join operation to the same table in case "select 'some stuff' from TABLE join TABLE ..."
              */
-            if (from_filter[0] === join_stuff.on) {
+            if (from_filter[0] === join_stuff[0].on) {
                 throw Error('Cannot apply join to the same table');
             }
 
@@ -137,7 +179,7 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                  * continue query if properties like "on table1.prop = table2.prop" are presented in their tables
                  * and not the same stuff
                  */
-                if (_.size(_.keys(sides)) !== 2 || sides.left === sides.right) {
+                if (_.size(_.compact(_.values(sides))) !== 2 || sides.left === sides.right) {
                     throw Error('Wrong columns in join block');
                 }
                 /**
@@ -184,6 +226,11 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
 
     SqlEngine.prototype = {
         constructor: SqlEngine,
+        /**
+         * @description
+         * @param input
+         * @returns {*}
+         */
         execute: function (input) {
             try {
                 input = 'SELECT ' + input;
@@ -192,7 +239,6 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                     tables,
                     filtered,
                     generated_table = {};
-
                 tables = this.getDbStuff();
                 filtered = filterTables(tables, res.from);
                 if (res.join) {
@@ -218,14 +264,26 @@ define('SQL_Engine/sqlEngine', ['SQL_Engine/parser', 'SQL_Engine/SQL_DB', 'lodas
                 return 'Error state';
             }
             catch (e) {
-                //console.log(e.message + ' ' + e.stack);
+                /**
+                 * logs errors to the console
+                 */
+                console.log(e.message + ' ' + e.stack);
                 return 'Error state';
             }
         },
+        /**
+         * @description
+         * @param data
+         * @returns {Object|*}
+         */
         setDb: function (data) {
             this._dataBase = new SQL_DB(data).getStructure();
             return this._dataBase;
         },
+        /**
+         * @description
+         * @returns {{}}
+         */
         getDbStuff: function () {
             var clone_structure = _.cloneDeep(this._dataBase),
                 obj = {};
