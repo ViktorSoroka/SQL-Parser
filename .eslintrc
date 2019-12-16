@@ -1,0 +1,114 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "globals": {
+    "module": "readonly",
+    "jest": "readonly",
+    "describe": "readonly",
+    "it": "readonly",
+    "expect": "readonly",
+    "beforeEach": "readonly",
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "plugins": ["babel"],
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "root": true,
+  "rules": {
+    "key-spacing": [
+      "error",
+      {
+        "beforeColon": false
+      }
+    ],
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": ["const", "let"],
+        "next": "*"
+      },
+      {
+        "blankLine": "any",
+        "prev": ["const", "let"],
+        "next": ["const", "let"]
+      },
+      {
+        "blankLine": "always",
+        "prev": "*",
+        "next": ["return"]
+      }
+    ],
+    "semi": "off",
+    "babel/semi": "error",
+    "object-curly-newline": [
+      "error",
+      {
+        "multiline": true,
+        "minProperties": 2
+      }
+    ],
+    "object-property-newline": [
+      "error",
+      {
+        "allowMultiplePropertiesPerLine": false
+      }
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1,
+        "maxEOF": 0,
+        "maxBOF": 0
+      }
+    ],
+    "no-void": "off",
+    "arrow-parens": ["error", "as-needed"],
+    "quote-props": ["error", "as-needed"],
+    "prefer-template": "error",
+    "no-else-return": "error",
+    "newline-per-chained-call": "error",
+    "linebreak-style": ["error", "unix"],
+    "arrow-body-style": "off",
+    "class-methods-use-this": "off",
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "only-multiline",
+        "objects": "only-multiline",
+        "imports": "only-multiline",
+        "exports": "only-multiline",
+        "functions": "only-multiline"
+      }
+    ],
+    "function-paren-newline": ["error", "consistent"],
+    "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+    "max-len": "off",
+    "no-console": "warn",
+    "no-multi-spaces": [
+      "error",
+      {
+        "ignoreEOLComments": true
+      }
+    ],
+    "no-nested-ternary": "off",
+    "no-param-reassign": [
+      "error",
+      {
+        "props": false
+      }
+    ],
+    "no-plusplus": "off",
+    "no-restricted-syntax": ["error", "LabeledStatement", "WithStatement"],
+    "no-underscore-dangle": "off",
+    "no-unused-vars": ["error"],
+    "operator-linebreak": ["off"],
+    "prefer-destructuring": "off"
+  }
+}

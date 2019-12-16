@@ -1,41 +1,42 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
+<html lang="en">
+  <head lang="en">
+    <meta charset="UTF-8" />
     <title>Sql Engine</title>
-    <link href='http://fonts.googleapis.com/css?family=Molengo' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,700,300)' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans+Narrow' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Pathway+Gothic+One' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/style.css"/>
-</head>
-<body>
-<main id="wrapper">
-    <header class="container clearfix">Sql Engine</header>
-    <section class="container parser-wrap">
+    <link href="http://fonts.googleapis.com/css?family=Molengo" rel="stylesheet" type="text/css" />
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,800,700,300)" rel="stylesheet" type="text/css" />
+    <link href="http://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet" type="text/css" />
+    <link href="http://fonts.googleapis.com/css?family=Pathway+Gothic+One" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <main id="wrapper">
+      <header class="container clearfix">Sql Engine</header>
+      <section class="container parser-wrap">
         <div class="row">
-            <div class="col-md-10">
-                <form class="parser-form" autocomplete="off">
-                    <div class="form-group" id="enter-input-wrap">
-                        <div class="input-group">
-                            <span class="input-group-addon">SELECT</span>
-                            <input type="text" class="form-control" id="enter-input"
-                                   value=""
-                                   placeholder="Enter some sql statement and press &quot;Enter&quot; to execute it...">
-                        </div>
-                        <span class="error-state">There is no data due you query or it is wrong!</span>
-                    </div>
-                </form>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-warning btn-block" id="btn-reset">Show tables</button>
-            </div>
+          <div class="col-md-10">
+            <form class="parser-form" autocomplete="off">
+              <div class="form-group" id="enter-input-wrap">
+                <div class="input-group">
+                  <span class="input-group-addon">SELECT</span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="enter-input"
+                    value=""
+                    placeholder='Enter some sql statement and press "Enter" to execute it...'
+                  />
+                </div>
+                <span class="error-state">There is no data due you query or it is wrong!</span>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-warning btn-block" id="btn-reset">Show tables</button>
+          </div>
         </div>
         <div id="target"></div>
-    </section>
-</main>
-
-<script data-main="main" src="../node_modules/requirejs/require.js"></script>
-</body>
+      </section>
+    </main>
+  </body>
 </html>
