@@ -5,7 +5,7 @@ import { cloneDeep } from 'lodash';
  * @param db {Object} - some database which then will store in the instance of a constructor
  * @constructor
  */
-var SQL_DB = function(db) {
+const SQL_DB = function(db) {
   this._structure = db || {};
 };
 /**

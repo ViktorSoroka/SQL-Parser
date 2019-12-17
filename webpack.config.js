@@ -38,11 +38,11 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               ident: 'postcss',
-              plugins: process.env.NODE_ENV === 'development' ? [] : [
-                require('autoprefixer')({}),
-                require('cssnano')({ preset: 'default' })
-              ],
-            }
+              plugins:
+                process.env.NODE_ENV === 'development'
+                  ? []
+                  : [require('autoprefixer')({}), require('cssnano')({ preset: 'default' })],
+            },
           },
         ],
       },

@@ -1,6 +1,10 @@
-import { compact, forIn, each } from 'lodash';
+import {
+ compact, forIn, each 
+} from 'lodash';
 
-const template = ({ table_name, item }) => {
+const template = ({
+ table_name, item 
+}) => {
   const rows = [];
   const cols = [];
 
@@ -8,7 +12,7 @@ const template = ({ table_name, item }) => {
     cols.push(`<th>${key}</th>`);
   });
 
-  each(item, function(row) {
+  each(item, row => {
     const columns = [];
 
     forIn(row, col => {

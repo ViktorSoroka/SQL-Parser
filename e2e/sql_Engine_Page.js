@@ -1,4 +1,4 @@
-var SQL_Engine_Page = function() {
+const SQL_Engine_Page = function() {
   browser.get('http://localhost:8080');
 };
 
@@ -28,7 +28,7 @@ SQL_Engine_Page.prototype = Object.create(
     },
     readyTableAjax: {
       value: function(time) {
-        browser.wait(function() {
+        browser.wait(() => {
           return element(by.css('#target table')).isPresent();
         }, time);
       },

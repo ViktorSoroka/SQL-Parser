@@ -1,43 +1,47 @@
-import Pattern from './parserPattern';
-
-var slice = Array.prototype.slice;
+import ParserPattern from './ParserPattern';
 
 const parserCore = {
   /**
    * @description - it can parse some text stuff by String matcher
    * @param text {String} - define data which need to find
-   * @returns {Pattern}
+   * @returns {ParserPattern}
    */
   txt: function(text) {
-    return new Pattern(function(str, pos) {
+    return new ParserPattern((str, pos) => {
       if (str.substr(pos, text.length) === text) {
-        return { res: text, end: pos + text.length };
+        return {
+          res: text,
+          end: pos + text.length,
+        };
       }
     });
   },
   /**
    * @description - it can parse some text stuff by RegExp matcher
    * @param regexp {RegExp} - define data which need to find
-   * @returns {Pattern}
+   * @returns {ParserPattern}
    */
   rgx: function(regexp) {
-    return new Pattern(function(str, pos) {
-      pos = pos || 0;
-      var result = regexp.exec(str.slice(pos));
+    return new ParserPattern((str, _pos) => {
+      const pos = _pos || 0;
+      const result = regexp.exec(str.slice(pos));
 
       if (result && result.index === 0) {
-        return { res: result[0], end: pos + result[0].length };
+        return {
+          res: result[0],
+          end: pos + result[0].length,
+        };
       }
     });
   },
   /**
    * @description - it take in some pattern which not necessarily to match some stuff
-   * @param pattern {Pattern} - instance of Pattern
-   * @returns {Pattern}
+   * @param pattern {ParserPattern} - instance of Pattern
+   * @returns {ParserPattern}
    */
   opt: function(pattern) {
-    return new Pattern(function(str, pos) {
-      var result = pattern.exec(str, pos);
+    return new ParserPattern((str, pos) => {
+      const result = pattern.exec(str, pos);
 
       return (
         result || {
@@ -49,13 +53,13 @@ const parserCore = {
   },
   /**
    * @description - it take in two patterns and returns stuff if the second one can`t parse but the first can
-   * @param pattern1 {Pattern} - first pattern
-   * @param pattern2 {Pattern} - second pattern
-   * @returns {Pattern}
+   * @param pattern1 {ParserPattern} - first pattern
+   * @param pattern2 {ParserPattern} - second pattern
+   * @returns {ParserPattern}
    */
   exc: function(pattern1, pattern2) {
     return arguments.length === 2
-      ? new Pattern(function(str, pos) {
+      ? new ParserPattern((str, pos) => {
           if (!pattern2.exec(str, pos) && pattern1.exec(str, pos)) {
             return pattern1.exec(str, pos);
           }
@@ -64,21 +68,21 @@ const parserCore = {
   },
   /**
    * @description - it take in patterns and returns the parsed result of the very first pattern which can parse
-   * @param {...Pattern} patterns - any number of patterns
-   * @returns {Pattern}
+   * @param {...ParserPattern} patterns - any number of patterns
+   * @returns {ParserPattern}
    */
-  any: function(patterns) {
-    var args = slice.call(arguments),
-      args_length = args.length;
-
-    if (!args_length) {
+  any: function(...patterns) {
+    if (!patterns.length) {
       return undefined;
     }
 
-    return new Pattern(function(str, pos) {
-      var parser, result, i;
-      for (i = 0; i < args_length; i += 1) {
-        parser = args[i];
+    return new ParserPattern((str, pos) => {
+      let parser;
+
+      let result;
+      let i;
+      for (i = 0; i < patterns.length; i += 1) {
+        parser = patterns[i];
         result = parser.exec(str, pos);
         if (result) {
           return result;
@@ -88,21 +92,22 @@ const parserCore = {
   },
   /**
    * @description - it execute a sequence of patterns
-   * @param patterns {...Pattern} - any number of patterns
-   * @returns {Pattern}
+   * @param patterns {...ParserPattern} - any number of patterns
+   * @returns {ParserPattern}
    */
-  seq: function(patterns) {
-    var args = slice.call(arguments),
-      result_parser;
+  seq: function(...patterns) {
+    let result_parser;
 
-    return new Pattern(function(str, pos) {
-      var result = [];
-      pos = pos || 0;
-      args.every(function(pars) {
+    return new ParserPattern((str, _pos) => {
+      const result = [];
+      let pos = _pos || 0;
+
+      patterns.every(pars => {
         result_parser = pars.exec(str, pos);
         if (!result_parser) {
           return undefined;
         }
+
         result.push(result_parser.res);
         pos = result_parser.end;
 
@@ -119,20 +124,22 @@ const parserCore = {
   },
   /**
    * @description - it execute patterns which in the parameters by repeating sequence till it can parse
-   * @param pattern {Pattern} - some pattern
+   * @param pattern {ParserPattern} - some pattern
    * @param separator - pattern which may to exist in parsed string but will not exist in parsed result
-   * @returns {Pattern}
+   * @returns {ParserPattern}
    */
   rep: function(pattern, separator) {
-    var separated = !separator
+    const separated = !separator
       ? pattern
-      : this.seq(separator, pattern).then(function(z) {
+      : this.seq(separator, pattern).then(z => {
           return z[1];
         });
 
-    return new Pattern(function(str, pos) {
-      var result = [],
-        result_parser = pattern.exec(str, pos);
+    return new ParserPattern((str, _pos) => {
+      const result = [];
+      let pos = _pos;
+
+      let result_parser = pattern.exec(str, pos);
       if (!result_parser) {
         return undefined;
       }

@@ -21,6 +21,10 @@
   },
   "root": true,
   "rules": {
+    "no-var": "error",
+    "prefer-const": "error",
+    "one-var": ["error", "never"],
+    "prefer-arrow-callback": "error",
     "key-spacing": [
       "error",
       {
@@ -31,13 +35,13 @@
       "error",
       {
         "blankLine": "always",
-        "prev": ["const", "let"],
+        "prev": ["const", "let", "block-like"],
         "next": "*"
       },
       {
         "blankLine": "any",
-        "prev": ["const", "let"],
-        "next": ["const", "let"]
+        "prev": ["const", "let", "block-like"],
+        "next": ["const", "let", "block-like"]
       },
       {
         "blankLine": "always",
